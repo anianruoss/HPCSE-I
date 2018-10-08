@@ -7,7 +7,7 @@ set grid ytics;
 set grid;
 set terminal pngcairo;
 set output 'results.png';
-set yrange [0.0:1.0];
+set yrange [0.0:2.0];
 plot 'results.txt' i 0 u 2:3 w l t 'offset=0B', 'results.txt' i 1 u 2:3 w l t 'offset=64B';
 "
 
