@@ -33,7 +33,7 @@ double measure(int N, int mode) {
 
     }
 
-    int k = 0;
+    volatile int k = 0;
 
     const auto t0 = std::chrono::steady_clock::now();
     for (int i = 0; i < M; ++i)
