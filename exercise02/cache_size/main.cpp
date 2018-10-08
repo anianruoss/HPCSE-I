@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <cstdlib>
 
+
+using interval_t = std::chrono::duration<double>;
+
 const int MIN_N = 1000 / sizeof(int);      // From 1 KB
 const int MAX_N = 20000000 / sizeof(int);  // to 20 MB.
 const int NUM_SAMPLES = 100;
@@ -25,33 +28,24 @@ void sattolo(int *p, int N) {
 double measure(int N, int mode) {
     if (mode == 0) {
         sattolo(a, N);
-        volatile int k = 0;
-
-        const auto t0 = std::chrono::steady_clock::now();
-        for (int i = 0; i < M; ++i)
-            k = a[k];
-        const auto t1 = std::chrono::steady_clock::now();
-
-        return std::chrono::duration_cast<
-                std::chrono::duration<double>>(t1 - t0).count();
-
     } else if (mode == 1) {
-        volatile int k = 0;
-
-        const auto t0 = std::chrono::steady_clock::now();
-        for (int i = 0; i < M; ++i)
-            k = a[i % N];
-        const auto t1 = std::chrono::steady_clock::now();
-
-        return std::chrono::duration_cast<
-                std::chrono::duration<double>>(t1 - t0).count();
-
+        for (int i = 0; i < N; ++i) {
+            a[i] = (i + 1) % N;
+        }
     } else if (mode == 2) {
-        // TODO: Question 1d: Initialize the permutation such that k jumps by 64 bytes (cyclically).
-
+        for (int i = 0; i < N; ++i) {
+            a[i] = (i + 64 / sizeof(int)) % N;
+        }
     }
 
-    return 0.;
+    volatile int k = 0;
+
+    const auto t0 = std::chrono::steady_clock::now();
+    for (int i = 0; i < M; ++i)
+        k = a[k];
+    const auto t1 = std::chrono::steady_clock::now();
+
+    return std::chrono::duration_cast<interval_t>(t1 - t0).count();
 }
 
 void run_mode(int mode) {
@@ -76,10 +70,7 @@ void run_mode(int mode) {
 int main() {
     run_mode(0);   // Random.
     run_mode(1);   // Sequential (jump by sizeof(int) bytes).
-
-    // TODO: Enable for Question 1d:
-    // run_mode(2);   // Sequential (jump by cache line size, i.e. 64 bytes).
+    run_mode(2);   // Sequential (jump by cache line size, i.e. 64 bytes).
 
     return 0;
 }
-
