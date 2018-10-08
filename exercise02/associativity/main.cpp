@@ -46,8 +46,7 @@ int main() {
     run(N);
 
     // Non-power-of-two size --> better.
-    // TODO: Enable for Question 2c:
-    // run(N + 64 / sizeof(double));
+    run(N + 64 / sizeof(double));
 
     return 0;
 }
