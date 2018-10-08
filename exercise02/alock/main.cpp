@@ -8,19 +8,31 @@ const int MAX_T = 100;  // Maximum number of threads.
 
 class ALock {
 private:
-    // TODO: Question 3a: Member variables.
+    std::atomic_int tail = {0};
+    volatile bool *flag = new volatile bool[MAX_T];
+    int *slot = new int[MAX_T];
 
 public:
     ALock() {
-        // TODO: Question 3a: Initial values.
+        for (int i = 0; i < MAX_T; ++i) {
+            flag[i] = false;
+        }
+        flag[0] = true;
+    }
+
+    ~ALock() {
+        delete[] flag;
+        delete[] slot;
     }
 
     void lock(int tid) {
-        // TODO: Question 3a
+        slot[tid] = tail++ % MAX_T;
+        while (not flag[slot[tid]]);
     }
 
     void unlock(int tid) {
-        // TODO: Question 3a
+        flag[slot[tid]] = false;
+        flag[(slot[tid] + 1) % MAX_T] = true;
     }
 };
 
@@ -42,7 +54,6 @@ void log(int tid, const char *info) {
 void suspend(int ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
-
 
 void emulate() {
     ALock lock;
@@ -68,7 +79,6 @@ void emulate() {
         // End parallel region.
     }
 }
-
 
 /*
  * Test that a lock works properly by executing some calculations.
