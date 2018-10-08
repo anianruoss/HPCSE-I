@@ -40,7 +40,7 @@ double measure(int N, int mode) {
 
         const auto t0 = std::chrono::steady_clock::now();
         for (int i = 0; i < M; ++i)
-            k = a[i];
+            k = a[i % N];
         const auto t1 = std::chrono::steady_clock::now();
 
         return std::chrono::duration_cast<
