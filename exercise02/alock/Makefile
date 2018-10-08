@@ -15,6 +15,6 @@ run:
 plot:
 	python3 plot.py
 
-alock: alock.cpp Makefile
-	$(CXX) $(CXXFLAGS) alock.cpp -o alock
+alock: main.cpp Makefile
+	$(CXX) $(CXXFLAGS) main.cpp -o alock
 
