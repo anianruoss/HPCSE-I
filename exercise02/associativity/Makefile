@@ -16,6 +16,6 @@ plot:
 	./plot.sh
 	# Plot stored into 'results.png'.
 
-associativity: associativity.cpp Makefile
-	$(CXX) $(CXXFLAGS) associativity.cpp -o associativity
+associativity: main.cpp Makefile
+	$(CXX) $(CXXFLAGS) main.cpp -o associativity
 
