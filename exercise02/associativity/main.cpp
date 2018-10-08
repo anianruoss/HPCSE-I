@@ -1,22 +1,31 @@
-#include <cstdio>
 #include <chrono>
+#include <cstdio>
+
+
+using interval_t = std::chrono::duration<double>;
 
 void measure_flops(int N, int K) {
-    // TODO: Question 2b: Allocate the buffer of N * K elements.
+    volatile double *buf = new volatile double[N * K];
+    for (int i = 0; i < N * K; ++i) {
+        buf[i] = 0;
+    }
 
-
-    // TODO: Question 2b: Repeat `repeat` times a traversal of arrays and
-    //                    measure total execution time.
     int repeat = 500 / K;
 
+    const auto t0 = std::chrono::steady_clock::now();
+    for (int i = 0; i < repeat; ++i) {
+        for (int n = 0; n < N; ++n) {
+            for (int k = 0; k < K; ++k) {
+                ++buf[(k * N) + n];
+            }
+        }
+    }
+    const auto t1 = std::chrono::steady_clock::now();
 
-
-
-    // TODO: Question 2b: Deallocate.
-
+    delete[] buf;
 
     // Report.
-    double time = 0.1;  /* TODO: Question 2b: time in seconds */
+    double time = std::chrono::duration_cast<interval_t>(t1 - t0).count();
     double flops = (double) repeat * N * K / time;
     printf("%d  %2d  %.4lf\n", N, K, flops * 1e-9);
     fflush(stdout);
