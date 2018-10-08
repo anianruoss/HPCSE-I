@@ -4,6 +4,7 @@
 #include <random>
 #include <thread>
 
+using interval_t = std::chrono::duration<double>;
 const int MAX_T = 100;  // Maximum number of threads.
 
 class ALock {
@@ -36,17 +37,12 @@ public:
     }
 };
 
-
 /*
  * Print the thread ID and the current time.
  */
-void log(int tid, const char *info) {
-    // TODO: Question 3a: Print the event in the format:
-    //  tid     info    time_since_start
-    //
-    // Note: Be careful with a potential race condition here.
+void log(int tid, const char *info, const double time) {
+    printf("%1i %7s %7.6lf\n", tid, info, time);
 }
-
 
 /*
  * Sleep for `ms` milliseconds.
@@ -58,25 +54,31 @@ void suspend(int ms) {
 void emulate() {
     ALock lock;
 
-#pragma omp parallel
+    const auto t0 = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> t1;
+
+#pragma omp parallel private(t1)
     {
         // Begin parallel region.
         int tid = omp_get_thread_num();  // Thread ID.
 
-        // TODO: Question 3b: Repeat multiple times
-        //      - log(tid, "BEFORE")
-        //      - lock
-        //      - log(tid, "INSIDE")
-        //      - Winside
-        //      - unlock
-        //      - log(tid, "AFTER")
-        //      - Woutside
-        //
-        // NOTE: Make sure that:
-        //      - there is no race condition in the random number generator
-        //      - each thread computes different random numbers
+        for (int i = 0; i < 5; ++i) {
+            t1 = std::chrono::steady_clock::now();
+            log(tid, "BEFORE",
+                std::chrono::duration_cast<interval_t>(t1 - t0).count());
+            lock.lock(tid);
 
-        // End parallel region.
+            t1 = std::chrono::steady_clock::now();
+            log(tid, "INSIDE",
+                std::chrono::duration_cast<interval_t>(t1 - t0).count());
+            suspend(50 + (std::rand() % (250 - 50 + 1)));
+            lock.unlock(tid);
+
+            t1 = std::chrono::steady_clock::now();
+            log(tid, "AFTER",
+                std::chrono::duration_cast<interval_t>(t1 - t0).count());
+            suspend(50 + (std::rand() % (250 - 50 + 1)));
+        }
     }
 }
 
@@ -110,10 +112,9 @@ void test_alock() {
 
 
 int main() {
-    test_alock();
 
-    // TODO: Question 3b:
-    // emulate();
+    test_alock();
+    emulate();
 
     return 0;
 }
