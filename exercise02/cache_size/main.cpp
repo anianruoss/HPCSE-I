@@ -14,7 +14,6 @@ int a[MAX_N];               // Permutation array.
 void sattolo(int *p, int N) {
     /*
      * Generate a random single-cycle permutation using Satollo's algorithm.
-     *
      * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Sattolo's_algorithm
      */
     for (int i = 0; i < N; ++i)
@@ -25,8 +24,7 @@ void sattolo(int *p, int N) {
 
 double measure(int N, int mode) {
     if (mode == 0) {
-        // TODO: Question 1b: Use the sattolo function to generate a random one-cycle permutation.
-
+        sattolo(a, N);
     } else if (mode == 1) {
         // TODO: Question 1c: Initialize the permutation such that k jumps by 1 item every step (cyclically).
 
@@ -35,12 +33,14 @@ double measure(int N, int mode) {
 
     }
 
-    // TODO: Question 1b: Traverse the list (make M jumps, starting from k = 0) and measure the execution time.
+    int k = 0;
 
+    const auto t0 = std::chrono::steady_clock::now();
+    for (int i = 0; i < M; ++i)
+        k = a[k];
+    const auto t1 = std::chrono::steady_clock::now();
 
-
-    // TODO: Question 1b: Return execution time in seconds.
-    return 0.1;
+    return (t1 - t0).count();
 }
 
 void run_mode(int mode) {
@@ -63,7 +63,6 @@ void run_mode(int mode) {
 }
 
 int main() {
-    // Question 1b:
     run_mode(0);   // Random.
 
     // TODO: Enable for Question 1c:
