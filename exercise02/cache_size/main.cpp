@@ -25,28 +25,33 @@ void sattolo(int *p, int N) {
 double measure(int N, int mode) {
     if (mode == 0) {
         sattolo(a, N);
+        volatile int k = 0;
+
+        const auto t0 = std::chrono::steady_clock::now();
+        for (int i = 0; i < M; ++i)
+            k = a[k];
+        const auto t1 = std::chrono::steady_clock::now();
+
+        return std::chrono::duration_cast<
+                std::chrono::duration<double>>(t1 - t0).count();
+
     } else if (mode == 1) {
         volatile int k = 0;
+
         const auto t0 = std::chrono::steady_clock::now();
         for (int i = 0; i < M; ++i)
             k = a[i];
         const auto t1 = std::chrono::steady_clock::now();
 
-        return (t1 - t0).count();
+        return std::chrono::duration_cast<
+                std::chrono::duration<double>>(t1 - t0).count();
 
     } else if (mode == 2) {
         // TODO: Question 1d: Initialize the permutation such that k jumps by 64 bytes (cyclically).
 
     }
 
-    volatile int k = 0;
-
-    const auto t0 = std::chrono::steady_clock::now();
-    for (int i = 0; i < M; ++i)
-        k = a[k];
-    const auto t1 = std::chrono::steady_clock::now();
-
-    return (t1 - t0).count();
+    return 0.;
 }
 
 void run_mode(int mode) {
