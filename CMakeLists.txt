@@ -15,3 +15,4 @@ add_subdirectory(utils)
 include_directories(utils)
 
 add_subdirectory(exercise01)
+add_subdirectory(exercise02)
