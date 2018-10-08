@@ -26,7 +26,13 @@ double measure(int N, int mode) {
     if (mode == 0) {
         sattolo(a, N);
     } else if (mode == 1) {
-        // TODO: Question 1c: Initialize the permutation such that k jumps by 1 item every step (cyclically).
+        volatile int k = 0;
+        const auto t0 = std::chrono::steady_clock::now();
+        for (int i = 0; i < M; ++i)
+            k = a[i];
+        const auto t1 = std::chrono::steady_clock::now();
+
+        return (t1 - t0).count();
 
     } else if (mode == 2) {
         // TODO: Question 1d: Initialize the permutation such that k jumps by 64 bytes (cyclically).
@@ -52,8 +58,8 @@ void run_mode(int mode) {
            "op_per_sec[10^9]");
     for (int i = 0; i < NUM_SAMPLES; ++i) {
         // Generate N in a logarithmic scale.
-        auto N = (int) (MIN_N * std::pow((double) MAX_N / MIN_N,
-                                         (double) i / (NUM_SAMPLES - 1)));
+        int N = (int) (MIN_N * std::pow((double) MAX_N / MIN_N,
+                                        (double) i / (NUM_SAMPLES - 1)));
         double t = measure(N, mode);
         printf("%9d  %9.1lf  %7.5lf  %7.6lf\n",
                N, N * sizeof(int) / 1024., t, M / t * 1e-9);
@@ -64,9 +70,7 @@ void run_mode(int mode) {
 
 int main() {
     run_mode(0);   // Random.
-
-    // TODO: Enable for Question 1c:
-    // run_mode(1);   // Sequential (jump by sizeof(int) bytes).
+    run_mode(1);   // Sequential (jump by sizeof(int) bytes).
 
     // TODO: Enable for Question 1d:
     // run_mode(2);   // Sequential (jump by cache line size, i.e. 64 bytes).
