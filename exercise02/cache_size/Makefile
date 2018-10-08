@@ -16,6 +16,6 @@ plot:
 	./plot.sh
 	# Plot stored into 'results.png'.
 
-cache_size: cache_size.cpp Makefile
-	$(CXX) $(CXXFLAGS) cache_size.cpp -o cache_size
+cache_size: main.cpp Makefile
+	$(CXX) $(CXXFLAGS) main.cpp -o cache_size
 
