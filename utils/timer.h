@@ -24,7 +24,7 @@
 
 class Timer {
     typedef std::chrono::nanoseconds prec;
-    typedef std::chrono::high_resolution_clock clock;
+    typedef std::chrono::steady_clock clock;
     typedef std::chrono::duration<double> duration_t;
 private:
     static const unsigned divisor = 1e9;
