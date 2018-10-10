@@ -18,10 +18,11 @@ void sattolo(int *p, int N) {
     /*
      * Generate a random single-cycle permutation using Satollo's algorithm.
      * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Sattolo's_algorithm
+     * https://danluu.com/sattolo/
      */
     for (int i = 0; i < N; ++i)
         p[i] = i;
-    for (int i = 0; i < N - 2; ++i)
+    for (int i = 0; i < N - 1; ++i)
         std::swap(p[i], p[i + 1 + rand() % (N - i - 1)]);
 }
 
