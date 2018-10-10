@@ -37,7 +37,7 @@ def main(filename):
         set yrange [-1:{}];
         set terminal pngcairo;
         set output 'results.png';
-        plot 'results-rearranged.txt' i 0 u 1:2 w l t 'Waiting' dt '-' lw 2, 'results-rearranged.txt' i 1 u 1:2 w l t 'Critical region' lw 3;
+        plot 'results-rearranged.txt' i 0 u 1:2 w l t 'Waiting' lw 2, 'results-rearranged.txt' i 1 u 1:2 w l t 'Critical region' lw 3;
     """.format(len(threads) + 1))])
     print("Plotted into 'results.png'.")
 
