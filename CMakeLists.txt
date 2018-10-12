@@ -21,3 +21,4 @@ include_directories(utils)
 
 add_subdirectory(exercise01)
 add_subdirectory(exercise02)
+add_subdirectory(exercise03)
