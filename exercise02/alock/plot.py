@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 from collections import defaultdict
 from textwrap import dedent
 
 import subprocess
-
 
 def main(filename):
     # Read and split by threads.
@@ -38,7 +37,7 @@ def main(filename):
         set terminal pngcairo;
         set output 'results.png';
         plot 'results-rearranged.txt' i 0 u 1:2 w l t 'Waiting' lw 2, 'results-rearranged.txt' i 1 u 1:2 w l t 'Critical region' lw 3;
-    """.format(len(threads) + 1))])
+    """.format(len(threads) + 1)).strip()])
     print("Plotted into 'results.png'.")
 
 

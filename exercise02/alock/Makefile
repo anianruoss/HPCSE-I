@@ -1,7 +1,7 @@
 CXX ?= g++
 CXXFLAGS = -O3 -Wall -Wextra -std=c++11 -fopenmp
 
-.PHONY: all clean run plot
+.PHONY: all clean run plot submit
 
 all: alock
 
@@ -13,7 +13,10 @@ run:
 	# Results stored into 'results.txt', run 'make plot'.
 
 plot:
-	python3 plot.py
+	python2 plot.py
+
+submit:
+	OMP_NUM_THREADS=12 bsub -R "span[ptile=12]" -n 12 make run
 
 alock: main.cpp Makefile
 	$(CXX) $(CXXFLAGS) main.cpp -o alock
