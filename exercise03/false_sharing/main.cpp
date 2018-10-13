@@ -1,11 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <random>
 #include <omp.h>
+#include <random>
+#include <cstdio>
+#include <cstdlib>
+
 
 // Integrand
 inline double F(double x, double y) {
-    if (x * x + y * y < 1.) { // inside unit circle 
+    if (x * x + y * y < 1.) { // inside unit circle
         return 4.;
     }
     return 0.;
@@ -27,23 +28,75 @@ double C0(size_t n) {
     return s / n;
 }
 
-// Method 1: openmp, no arrays 
-// TODO: Question 1a.1
+// Method 1: OpenMP, no arrays
 double C1(size_t n) {
-    return 1.;
+    double sum = {0};
+
+#pragma omp parallel
+    {
+        // random generator with seed tid to avoid race conditions
+        std::default_random_engine g(omp_get_thread_num() + 1u);
+        // uniform distribution in [0, 1]
+        std::uniform_real_distribution<double> u;
+
+#pragma omp for reduction(+ : sum) nowait
+        for (size_t i = 0; i < n; ++i) {
+            double x = u(g);
+            double y = u(g);
+            sum += F(x, y);
+        }
+    }
+
+    return sum / n;
 }
 
-
 // Method 2, only `omp parallel for reduction`, arrays without padding
-// TODO: Question 1a.2
 double C2(size_t n) {
-    return 1.;
+    double sum = {0};
+    const int num_threads = omp_get_max_threads();
+
+    auto *generators = new std::default_random_engine[num_threads];
+    std::uniform_real_distribution<double> u;
+
+    for (int i = 0; i < num_threads; ++i) {
+        generators[i] = std::default_random_engine{i + 1u};
+    }
+
+#pragma omp parallel for reduction(+ : sum)
+    for (size_t i = 0; i < n; ++i) {
+        double x = u(generators[omp_get_thread_num()]);
+        double y = u(generators[omp_get_thread_num()]);
+        sum += F(x, y);
+    }
+
+    delete[] generators;
+
+    return sum / n;
 }
 
 // Method 3, only `omp parallel for reduction`, arrays with padding
-// TODO: Question 1a.3
 double C3(size_t n) {
-    return 1.;
+    double sum = {0};
+    const int num_threads = omp_get_max_threads();
+    const int pad = 64 / sizeof(std::default_random_engine);
+
+    auto *generators = new std::default_random_engine[num_threads * pad];
+    std::uniform_real_distribution<double> u;
+
+    for (int i = 0; i < num_threads; ++i) {
+        generators[i * pad] = std::default_random_engine{i + 1u};
+    }
+
+#pragma omp parallel for reduction(+ : sum)
+    for (size_t i = 0; i < n; ++i) {
+        double x = u(generators[omp_get_thread_num() * pad]);
+        double y = u(generators[omp_get_thread_num() * pad]);
+        sum += F(x, y);
+    }
+
+    delete[] generators;
+
+    return sum / n;
 }
 
 // Returns integral of F(x,y) over unit square (0 < x < 1, 0 < y < 1).
