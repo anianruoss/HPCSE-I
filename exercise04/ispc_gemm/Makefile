@@ -76,9 +76,9 @@ gemm_avx2.o: gemm.ispc
 # directory will also be added to your PATH variable, such that you can use
 # ispc the next time you login.
 install_ispc_linux_x86_64:
-	tar -C ../../bin -xJf ../../bin/ispc.tar.xz
+	tar -C ../bin -xJf ../bin/ispc.tar.xz
 	mkdir -p ~/bin
-	mv ../../bin/ispc ~/bin
+	mv ../bin/ispc ~/bin
 	echo 'export PATH=$$HOME/bin:$$PATH' >> ~/.bashrc
 
 # You can submit a job on euler using this target.  It depends on the 'gemm'
