@@ -3,10 +3,7 @@
 # Description: Compile targets
 # Copyright 2018 ETH Zurich. All Rights Reserved.
 CXX ?= g++
-###############################################################################
-# TODO: Fill in the compiler flags.  Make sure you compile SSE code
-CXXFLAGS =
-###############################################################################
+CXXFLAGS = -msse -std=c++11 -fopenmp
 
 # debug=true --> use assertions for debugging
 debug ?= false
@@ -14,21 +11,13 @@ debug ?= false
 .PHONY: clean measurement
 
 ifeq ("$(debug)", "false")
-###############################################################################
-# TODO: You may want to add flags here?
-CXXFLAGS += -DNDEBUG
-###############################################################################
+CXXFLAGS += -DNDEBUG -Wall -Wpedantic -Wextra
 else
 CXXFLAGS += -O0 -g
 endif
 
-###############################################################################
-# TODO: Write the main make target 'vec_red'.  This target will compile your
-# code using the flags you set in CXXFLAGS.  Be sure that the generated
-# executable is named 'vec_red' in order to use the BASH script
-# measure_speedup.sh later on.
-vec_red:
-###############################################################################
+vec_red: vectorized_reduction.cpp Makefile
+	$(CXX) $(CXXFLAGS) $< -o vec_red
 
 # You can submit a job on euler using this target.  It depends on the 'vec_red'
 # target, that is, it will compile the code if there are changes prior to

@@ -13,9 +13,6 @@
 
 using namespace std;
 
-///////////////////////////////////////////////////////////////////////////////
-// Helpers, YOU DO NOT NEED TO WORK ON THESE
-///////////////////////////////////////////////////////////////////////////////
 /**
  * @brief Initialize array to standard normal data
  *
@@ -59,7 +56,7 @@ static inline T gold_red(const T *const ary, const size_t N) {
  */
 template<typename T>
 void benchmark_serial(const size_t N, T(*func)(const T *const, const size_t),
-                      const string test_name) {
+                      const string &test_name) {
     T *ary;
     posix_memalign((void **) &ary, 16, N * sizeof(T));
     typedef chrono::steady_clock Clock;
@@ -102,13 +99,7 @@ void benchmark_serial(const size_t N, T(*func)(const T *const, const size_t),
     // clean up
     free(ary);
 }
-///////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////
-// Partially complete. TODO: YOUR TASK IS TO WRITE THE MISSING CODE. Note: A
-// working code can be achieved with ~35 more lines of code for all TODO's
-// below.
-///////////////////////////////////////////////////////////////////////////////
 /**
  * @brief Vectorized reduction kernel using SSE intrinsics (4-way SIMD)
  *
@@ -118,12 +109,23 @@ void benchmark_serial(const size_t N, T(*func)(const T *const, const size_t),
  * @return Returns reduced value (scalar)
  */
 static inline float sse_red_4(const float *const ary, const size_t N) {
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: Write your vectorized reduction kernel here using intrinsics from
-    // the xmmintrin.h header above.  The Intel intrinsics guide is a helpful
-    // reference: https://software.intel.com/sites/landingpage/IntrinsicsGuide
-    ///////////////////////////////////////////////////////////////////////////
-    return 0.0; // the function returns the summation of all elemnts in ary
+    const int simd_width = 16 / sizeof(float);
+    __m128 sum4 = _mm_set_ps1(0.f);
+
+    for (size_t i = 0; i < N; i += simd_width) {
+        sum4 = _mm_add_ps(sum4, _mm_load_ps(ary + i));
+    }
+
+    float sum = 0;
+    float *sum_array;
+    posix_memalign((void **) &sum_array, 16, 4 * sizeof(float));
+    _mm_store_ps(sum_array, sum4);
+
+    for (int i = 0; i < 4; ++i) {
+        sum += sum_array[i];
+    }
+
+    return sum;
 }
 
 /**
@@ -135,12 +137,23 @@ static inline float sse_red_4(const float *const ary, const size_t N) {
  * @return Returns reduced value (scalar)
  */
 static inline double sse_red_2(const double *const ary, const size_t N) {
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: Write your vectorized reduction kernel for doubles (2-way SIMD)
-    // here.  Note this code is very similar to what you do in sse_red_4 for
-    // the 4-way SIMD case (floats)
-    ///////////////////////////////////////////////////////////////////////////
-    return 0.0; // the function returns the summation of all elemnts in ary
+    const int simd_width = 16 / sizeof(double);
+    __m128d sum2 = _mm_set_pd1(0.f);
+
+    for (size_t i = 0; i < N; i += simd_width) {
+        sum2 = _mm_add_pd(sum2, _mm_load_pd(ary + i));
+    }
+
+    double sum = 0;
+    double *sum_array;
+    posix_memalign((void **) &sum_array, 16, 2 * sizeof(double));
+    _mm_store_pd(sum_array, sum2);
+
+    for (int i = 0; i < 2; ++i) {
+        sum += sum_array[i];
+    }
+
+    return sum;
 }
 
 /**
@@ -157,17 +170,17 @@ static inline double sse_red_2(const double *const ary, const size_t N) {
  */
 template<typename T>
 void benchmark_omp(const size_t N, T(*func)(const T *const, const size_t),
-                   const size_t nthreads, const string test_name) {
+                   const size_t nthreads, const string &test_name) {
     T *ary;
     // total length of test array is nthreads*N
     posix_memalign((void **) &ary, 16, nthreads * N * sizeof(T));
     typedef chrono::steady_clock Clock;
 
     // initialize data
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: Initialize the array 'ary' using the 'initialize' function defined
-    // above.
-    ///////////////////////////////////////////////////////////////////////////
+#pragma omp parallel for
+    for (size_t i = 0; i < nthreads; ++i) {
+        initialize(ary + nthreads * i, nthreads, i);
+    }
 
     // reference (sequential)
     T res_gold = gold_red(ary, nthreads * N); // warm-up
@@ -181,12 +194,17 @@ void benchmark_omp(const size_t N, T(*func)(const T *const, const size_t),
             t2 - t1).count();
 
     // test
-    T gres = 0.0;    // result
-    double gt = 0.0; // time
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: Write the benchmarking code for the test kernel 'func' here.  See
-    // the serial implementation 'benchmark_serial' above to get an idea.
-    ///////////////////////////////////////////////////////////////////////////
+    T gres = (*func)(ary, nthreads * N); // warm up
+    auto tt1 = Clock::now();
+#pragma omp for
+    for (int i = 0; i < 10; ++i) {
+        T tmp = (*func)(ary, N * nthreads);
+#pragma omp critical
+        gres += tmp;
+    }
+    auto tt2 = Clock::now();
+    const double gt = chrono::duration_cast<chrono::nanoseconds>(
+            tt2 - tt1).count();
 
     // Report
     cout << test_name << ": got " << nthreads << " threads" << endl;
@@ -201,7 +219,7 @@ void benchmark_omp(const size_t N, T(*func)(const T *const, const size_t),
     free(ary);
 }
 
-int main(void) {
+int main() {
     // Two different work size we want to test our reduction on.
     constexpr size_t N0 = (1 << 15);
     constexpr size_t N1 = (1 << 20);
@@ -219,9 +237,8 @@ int main(void) {
     // OMP:
     //   Test the vectorized reduction kernels (2-way and 4-way) using OpenMP
     //   to exploit TLP.
-    cout
-            << "###############################################################################"
-            << endl;
+    cout << "#################################################################"
+         << endl;
     cout << "TESTING SIZE N = " << N0 << endl;
     // run serial tests
     benchmark_serial<float>(N0, sse_red_4, "4-way SSE (serial)");
@@ -229,13 +246,11 @@ int main(void) {
     // run concurrent tests
     benchmark_omp<float>(N0, sse_red_4, nthreads, "4-way SSE (concurrent)");
     benchmark_omp<double>(N0, sse_red_2, nthreads, "2-way SSE (concurrent)");
-    cout
-            << "###############################################################################"
-            << endl;
+    cout << "#################################################################"
+         << endl;
 
-    cout
-            << "###############################################################################"
-            << endl;
+    cout << "#################################################################"
+         << endl;
     cout << "TESTING SIZE N = " << N1 << endl;
     // run serial tests
     benchmark_serial<float>(N1, sse_red_4, "4-way SSE (serial)");
@@ -243,9 +258,8 @@ int main(void) {
     // run concurrent tests
     benchmark_omp<float>(N1, sse_red_4, nthreads, "4-way SSE (concurrent)");
     benchmark_omp<double>(N1, sse_red_2, nthreads, "2-way SSE (concurrent)");
-    cout
-            << "###############################################################################"
-            << endl;
+    cout << "#################################################################"
+         << endl;
 
     return 0;
 }
