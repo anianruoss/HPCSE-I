@@ -5,11 +5,7 @@
 CXX ?= g++
 CXXFLAGS ?= -Wall -Wextra -pedantic -std=c++11
 ISPC ?= ispc
-###############################################################################
-# TODO: Complete the ISPC flags.  You need to specify the architecture for
-# which you want to compile code here.  Check out 'ispc --help'
-ISPCFLAGS ?=
-###############################################################################
+ISPCFLAGS ?= --arch=x86-64
 
 # prec=single --> single precision (32bit floats)
 # prec=double --> double precision (64bit floats)
@@ -47,27 +43,13 @@ gemm: gemm.cpp gemm_sse2.o gemm_avx2.o
 gemm_serial: gemm.cpp
 	$(CXX) $(CXXFLAGS) $(extra) -o $@ $^
 
-###############################################################################
-# TODO: Complete the target to compile SSE2 code.  You need to specify the
-# (extended) instruction set that you want to use here.  The target name gives
-# you a hint, also check out 'ispc --help'.  The -o options specifies the
-# output filename and the -h option creates a header file (which is the one we
-# include in our application code gemm.cpp).
 gemm_sse2.o: gemm.ispc
-	$(ISPC) $(ISPCFLAGS) $(extra) -D_ISPC_SSE2_ \
-		-o gemm_sse2.o -h gemm_sse2.h $<
-###############################################################################
+	$(ISPC) $(ISPCFLAGS) $(extra) --target=sse2 -D_ISPC_SSE2_ \
+	-o gemm_sse2.o -h gemm_sse2.h $<
 
-###############################################################################
-# TODO: Complete the target to compile AVX2 code.  You need to specify the
-# (extended) instruction set that you want to use here.  The target name gives
-# you a hint, also check out 'ispc --help'.  The -o options specifies the
-# output filename and the -h option creates a header file (which is the one we
-# include in our application code gemm.cpp).
 gemm_avx2.o: gemm.ispc
-	$(ISPC) $(ISPCFLAGS) $(extra) -D_ISPC_AVX2_ \
+	$(ISPC) $(ISPCFLAGS) $(extra) --target=avx2 -D_ISPC_AVX2_ \
 		-o gemm_avx2.o -h gemm_avx2.h $<
-###############################################################################
 
 # before you can use the ispc command, you need to install it.  This target
 # does the installation for you.  Note that this installs a Linux 64bit binary,

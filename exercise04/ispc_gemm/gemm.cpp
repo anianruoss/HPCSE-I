@@ -33,12 +33,13 @@ using namespace std;
 template<typename T>
 static void gemm_serial(const T *const A, const T *const B, T *const C,
                         const int p, const int r, const int q) {
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: Write your serial implementation of a matrix-matrix multiplication
-    // here.  Note the generic type T which allows to use this function for
-    // different types T.  Note: A working code can be achieved with ~10 more
-    // lines of code.
-    ///////////////////////////////////////////////////////////////////////////
+    for (int i = 0; i < p; ++i) {
+        for (int k = 0; k < r; ++k) {
+            for (int j = 0; j < q; ++j) {
+                C[i * q + j] += A[i * r + k] * B[k * q + j];
+            }
+        }
+    }
 }
 
 /**
@@ -103,9 +104,8 @@ static void initialize(T *const A, T *const B, const int p, const int r,
 template<typename T>
 void benchmark(const int p, const int r, const int q,
                void (*func)(const T *const, const T *const, T *const,
-                            const int,
-                            const int, const int),
-               const string test_name) {
+                            const int, const int, const int),
+               const string &test_name) {
     T *A, *B, *C, *truth;
     posix_memalign((void **) &A, 32, p * r * sizeof(T));
     posix_memalign((void **) &B, 32, r * q * sizeof(T));
@@ -151,7 +151,7 @@ void benchmark(const int p, const int r, const int q,
     free(truth);
 }
 
-int main(void) {
+int main() {
     // problem size:
     // Matrix $A \in\mathbb{R}^{ p \times r }$
     // Matrix $B \in\mathbb{R}^{ r \times q }$

@@ -15,29 +15,20 @@
  * @param r Dimensional parameter
  * @param q Dimensional parameter
  */
-/* TODO: Missing piece */
+export
 #ifdef _ISPC_SSE2_
 void gemm_sse2(
 #else
-
 void gemm_avx2(
 #endif /* _ISPC_SSE2_ */
-        const /* TODO: Missing piece */ A,
-        const /* TODO: Missing piece */ B,
-        /* TODO: Missing piece */ C,
-        const /* TODO: Missing piece */ int p,
-        const /* TODO: Missing piece */ int r,
-        const /* TODO: Missing piece */ int q) {
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: Write your ISPC implementation of a matrix-matrix multiplication
-    // here.  Try to use a general type for floating point numbers, such that
-    // you can easily compile this kernel for float (single precision, 32bit)
-    // and double (double precision, 64bit).  Check out the 'common.h' header
-    // for a hint.  Note: A working code can be implemented with ~15 lines of
-    // ISPC code.
-    //
-    // We use two different function names for the same function, such that we
-    // can compile for two different targets (SSE2 and AVX2) and link both of
-    // them to our application code in 'gemm.cpp'.
-    ///////////////////////////////////////////////////////////////////////////
+    const uniform Real * const uniform A,
+    const uniform Real * const uniform B,
+    uniform Real * const uniform C,
+    const uniform int p,
+    const uniform int r,
+    const uniform int q
+) {
+    foreach(i = 0...p, k = 0...r, j = 0...q) {
+        C[i * q + j]+= A[i * r + k] * B[k * q + j];
+    }
 }
