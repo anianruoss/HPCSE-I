@@ -36,3 +36,7 @@
 
 # Build directory
 build/
+
+# virtualenv files
+venv/
+
