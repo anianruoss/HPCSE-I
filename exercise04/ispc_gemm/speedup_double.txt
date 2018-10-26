@@ -1,0 +1,53 @@
+Sender: LSF System <lsfadmin@eu-c7-082-08>
+Subject: Job 76385118: <./gemm> in cluster <euler> Done
+
+Job <./gemm> was submitted from host <eu-login-11-ng> by user <anruoss> in cluster <euler> at Fri Oct 26 20:38:06 2018
+Job was executed on host(s) <24*eu-c7-082-08>, in queue <normal.4h>, as user <anruoss> in cluster <euler> at Fri Oct 26 20:38:28 2018
+</cluster/home/anruoss> was used as the home directory.
+</cluster/home/anruoss/HPCSE-I/exercises/exercise04/ispc_gemm> was used as the working directory.
+Started at Fri Oct 26 20:38:28 2018
+Terminated at Fri Oct 26 20:38:32 2018
+Results reported at Fri Oct 26 20:38:32 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./gemm
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   2.07 sec.
+    Max Memory :                                 24 MB
+    Average Memory :                             -
+    Total Requested Memory :                     24576.00 MB
+    Delta Memory :                               24552.00 MB
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   6 sec.
+    Turnaround time :                            26 sec.
+
+The output (if any) follows:
+
+GEMM serial:
+  Data type size:     8 byte
+  Number of elements: A=524288; B=1048576; C=524288
+  Norm of truth:      255.966
+  Error:              0
+  Speedup:            1.16227
+GEMM ISPC SSE2:
+  Data type size:     8 byte
+  Number of elements: A=524288; B=1048576; C=524288
+  Norm of truth:      255.966
+  Error:              0
+  Speedup:            1.5894
+GEMM ISPC AVX2:
+  Data type size:     8 byte
+  Number of elements: A=524288; B=1048576; C=524288
+  Norm of truth:      255.966
+  Error:              2.52435e-14
+  Speedup:            2.41001

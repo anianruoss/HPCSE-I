@@ -1,0 +1,53 @@
+Sender: LSF System <lsfadmin@eu-c7-046-09>
+Subject: Job 76385753: <./gemm> in cluster <euler> Done
+
+Job <./gemm> was submitted from host <eu-login-11-ng> by user <anruoss> in cluster <euler> at Fri Oct 26 21:03:39 2018
+Job was executed on host(s) <24*eu-c7-046-09>, in queue <normal.4h>, as user <anruoss> in cluster <euler> at Fri Oct 26 21:04:05 2018
+</cluster/home/anruoss> was used as the home directory.
+</cluster/home/anruoss/HPCSE-I/exercises/exercise04/ispc_gemm> was used as the working directory.
+Started at Fri Oct 26 21:04:05 2018
+Terminated at Fri Oct 26 21:04:08 2018
+Results reported at Fri Oct 26 21:04:08 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./gemm
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.90 sec.
+    Max Memory :                                 14 MB
+    Average Memory :                             -
+    Total Requested Memory :                     24576.00 MB
+    Delta Memory :                               24562.00 MB
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   33 sec.
+    Turnaround time :                            29 sec.
+
+The output (if any) follows:
+
+GEMM serial:
+  Data type size:     4 byte
+  Number of elements: A=524288; B=1048576; C=524288
+  Norm of truth:      256.212
+  Error:              0
+  Speedup:            1.14912
+GEMM ISPC SSE2:
+  Data type size:     4 byte
+  Number of elements: A=524288; B=1048576; C=524288
+  Norm of truth:      256.212
+  Error:              0
+  Speedup:            2.6106
+GEMM ISPC AVX2:
+  Data type size:     4 byte
+  Number of elements: A=524288; B=1048576; C=524288
+  Norm of truth:      256.212
+  Error:              1.36074e-05
+  Speedup:            4.0649
