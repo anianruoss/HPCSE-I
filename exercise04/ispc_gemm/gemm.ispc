@@ -28,7 +28,17 @@ void gemm_avx2(
     const uniform int r,
     const uniform int q
 ) {
-    foreach(i = 0...p, k = 0...r, j = 0...q) {
-        C[i * q + j]+= A[i * r + k] * B[k * q + j];
+    const uniform int tile_size = (1 << 14) / sizeof(Real);
+
+    for (uniform int i = 0; i < p; ++i) {
+        for (uniform int k = 0; k < r; ++k) {
+            for (uniform int tile = 0; tile < (q / tile_size); ++tile) {
+                foreach (t = 0...tile_size) {
+                    C[i*q + t + (tile*tile_size)] +=
+                    A[i*r + k] * B[k*q + t + (tile*tile_size)];
+                }
+
+            }
+        }
     }
 }
