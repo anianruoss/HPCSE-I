@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstdlib>     // posix_memalign
 #include <emmintrin.h> // SSE/SSE2 intrinsics header
+#include <pmmintrin.h>
 #include <omp.h>
 
 using namespace std;
@@ -116,16 +117,10 @@ static inline float sse_red_4(const float *const ary, const size_t N) {
         sum4 = _mm_add_ps(sum4, _mm_load_ps(ary + i));
     }
 
-    float sum = 0;
-    float *sum_array;
-    posix_memalign((void **) &sum_array, 16, 4 * sizeof(float));
-    _mm_store_ps(sum_array, sum4);
+    sum4 = _mm_hadd_ps(sum4, sum4);
+    sum4 = _mm_hadd_ps(sum4, sum4);
 
-    for (int i = 0; i < 4; ++i) {
-        sum += sum_array[i];
-    }
-
-    return sum;
+    return _mm_cvtss_f32(sum4);
 }
 
 /**
@@ -144,16 +139,9 @@ static inline double sse_red_2(const double *const ary, const size_t N) {
         sum2 = _mm_add_pd(sum2, _mm_load_pd(ary + i));
     }
 
-    double sum = 0;
-    double *sum_array;
-    posix_memalign((void **) &sum_array, 16, 2 * sizeof(double));
-    _mm_store_pd(sum_array, sum2);
+    sum2 = _mm_hadd_pd(sum2, sum2);
 
-    for (int i = 0; i < 2; ++i) {
-        sum += sum_array[i];
-    }
-
-    return sum;
+    return _mm_cvtsd_f64(sum2);
 }
 
 /**
@@ -179,7 +167,7 @@ void benchmark_omp(const size_t N, T(*func)(const T *const, const size_t),
     // initialize data
 #pragma omp parallel for
     for (size_t i = 0; i < nthreads; ++i) {
-        initialize(ary + nthreads * i, nthreads, i);
+        initialize(ary + i*N, N, i);
     }
 
     // reference (sequential)
@@ -196,11 +184,11 @@ void benchmark_omp(const size_t N, T(*func)(const T *const, const size_t),
     // test
     T gres = (*func)(ary, nthreads * N); // warm up
     auto tt1 = Clock::now();
-#pragma omp for
     for (int i = 0; i < 10; ++i) {
-        T tmp = (*func)(ary, N * nthreads);
-#pragma omp critical
-        gres += tmp;
+#pragma omp parallel for reduction (+: gres)
+        for (size_t i = 0; i < nthreads; ++i) {
+            gres += (*func)(ary + i * N, N);
+        }
     }
     auto tt2 = Clock::now();
     const double gt = chrono::duration_cast<chrono::nanoseconds>(

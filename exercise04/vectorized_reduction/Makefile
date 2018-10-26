@@ -3,7 +3,7 @@
 # Description: Compile targets
 # Copyright 2018 ETH Zurich. All Rights Reserved.
 CXX ?= g++
-CXXFLAGS = -msse -std=c++11 -fopenmp
+CXXFLAGS = -msse3 -std=c++11 -fopenmp
 
 # debug=true --> use assertions for debugging
 debug ?= false
