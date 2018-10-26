@@ -167,7 +167,7 @@ void benchmark_omp(const size_t N, T(*func)(const T *const, const size_t),
     // initialize data
 #pragma omp parallel for
     for (size_t i = 0; i < nthreads; ++i) {
-        initialize(ary + i*N, N, i);
+        initialize(ary + (i * N), N, i);
     }
 
     // reference (sequential)
@@ -187,7 +187,7 @@ void benchmark_omp(const size_t N, T(*func)(const T *const, const size_t),
     for (int i = 0; i < 10; ++i) {
 #pragma omp parallel for reduction (+: gres)
         for (size_t i = 0; i < nthreads; ++i) {
-            gres += (*func)(ary + i * N, N);
+            gres += (*func)(ary + (i * N), N);
         }
     }
     auto tt2 = Clock::now();
