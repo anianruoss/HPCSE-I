@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <functional>
 #include <iostream>
-#include <mkl_lapack.h>
+#include <mkl_lapacke.h>
 #include <random>
 #include <vector>
 
