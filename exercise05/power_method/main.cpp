@@ -149,6 +149,23 @@ void evaluatePowerMethod(const size_t N, F1 gemv, F2 nrm2, F3 dot) {
     std::cout << t << ",";
   }
   std::cout << std::endl << std::endl;
+
+  std::cout << "Power Method for Large Matrices with alpha = 4" << std::endl;
+  std::vector<size_t> N_vals = {1024, 4096, 8192};
+
+  for (const auto &n : N_vals) {
+    const auto t0 = std::chrono::steady_clock::now();
+    powerMethod(n, 4, gemv, nrm2, dot);
+    const auto t1 = std::chrono::steady_clock::now();
+
+    std::cout << "Matrix size: " << n << "x" << n << std::endl;
+    std::cout << "Time: "
+              << std::chrono::duration_cast<std::chrono::duration<double>>(t1 -
+                                                                           t0)
+                     .count()
+              << std::endl;
+  }
+  std::cout << std::endl;
 }
 
 int main() {
