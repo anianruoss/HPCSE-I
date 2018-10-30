@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <functional>
 #include <iostream>
+#include <mkl_lapack.h>
 #include <random>
 #include <vector>
 
@@ -40,14 +41,7 @@ void dgemv(const size_t N, const double *A, const double *q, double *res) {
   }
 }
 
-template <class F1, class F2, class F3>
-std::pair<size_t, double> powerMethod(const size_t N, double alpha, F1 gemv,
-                                      F2 nrm2, F3 dot) {
-  auto *q = new double[N];
-  std::fill(q, q + N, 0.);
-  q[0] = 1.;
-
-  auto *A = new double[N * N];
+void allocateA(const size_t N, double *A, const double alpha) {
   std::default_random_engine g(0);
   std::uniform_real_distribution<double> u;
 
@@ -60,6 +54,17 @@ std::pair<size_t, double> powerMethod(const size_t N, double alpha, F1 gemv,
       }
     }
   }
+}
+
+template <class F1, class F2, class F3>
+std::pair<size_t, double> powerMethod(const size_t N, double alpha, F1 gemv,
+                                      F2 nrm2, F3 dot) {
+  auto *q = new double[N];
+  std::fill(q, q + N, 0.);
+  q[0] = 1.;
+
+  auto *A = new double[N * N];
+  allocateA(N, A, alpha);
 
   auto *res = new double[N];
   gemv(N, A, q, res);
@@ -168,6 +173,46 @@ void evaluatePowerMethod(const size_t N, F1 gemv, F2 nrm2, F3 dot) {
   std::cout << std::endl;
 }
 
+void evaluateDSYEV(const size_t N) {
+  std::vector<double> alphas;
+  std::vector<double> times;
+
+  for (int i = -3; i < 5; ++i) {
+    alphas.emplace_back(std::pow(2., i));
+    if (i == 0) {
+      alphas.emplace_back(3. / 2);
+    }
+  }
+
+  auto *A = new double[N * N];
+  auto *eigVals = new double[N];
+
+  for (const auto &alpha : alphas) {
+    std::cout << "Applying dsyev with alpha = " << alpha << std::endl;
+    allocateA(N, A, alpha);
+
+    const auto t0 = std::chrono::steady_clock::now();
+    LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'N', 'U', N, A, N, eigVals);
+    const auto t1 = std::chrono::steady_clock::now();
+
+    std::cout << "1st dominant eigenvalue: " << eigVals[N - 1] << std::endl;
+    std::cout << "2nd dominant eigenvalue: " << eigVals[N - 2] << std::endl;
+
+    times.emplace_back(
+        std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
+            .count());
+  }
+
+  delete[] eigVals;
+  delete[] A;
+
+  std::cout << "RUNTIMES" << std::endl;
+  for (const auto &t : times) {
+    std::cout << t << ",";
+  }
+  std::cout << std::endl << std::endl;
+}
+
 int main() {
   const size_t N = 1024;
 
@@ -186,6 +231,9 @@ int main() {
 
   std::cout << "POWER METHOD WITH BLAS" << std::endl;
   evaluatePowerMethod(N, blas_dgemv, blas_dnorm, blas_ddot);
+
+  std::cout << "DSYEV WITH LAPACK" << std::endl;
+  evaluateDSYEV(N);
 
   return 0;
 }
