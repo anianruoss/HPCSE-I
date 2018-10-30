@@ -1,0 +1,95 @@
+POWER METHOD WITHOUT BLAS
+Applying power method with alpha = 0.125
+Iterations: 12
+Dominant Eigenvalue: 578.272
+
+Applying power method with alpha = 0.25
+Iterations: 18
+Dominant Eigenvalue: 650.169
+
+Applying power method with alpha = 0.5
+Iterations: 32
+Dominant Eigenvalue: 809.34
+
+Applying power method with alpha = 1
+Iterations: 88
+Dominant Eigenvalue: 1183.13
+
+Applying power method with alpha = 1.5
+Iterations: 232
+Dominant Eigenvalue: 1614.88
+
+Applying power method with alpha = 2
+Iterations: 584
+Dominant Eigenvalue: 2084.33
+
+Applying power method with alpha = 4
+Iterations: 8538
+Dominant Eigenvalue: 4094.38
+
+Applying power method with alpha = 8
+Iterations: 11478
+Dominant Eigenvalue: 8184.43
+
+Applying power method with alpha = 16
+Iterations: 11923
+Dominant Eigenvalue: 16368.2
+
+Fewest iterations: 12
+For alpha: 0.125
+With eigenvalue: 578.272
+
+Most iterations: 11923
+For alpha: 16
+With eigenvalue: 16368.2
+
+RUNTIMES
+0.151362,0.117652,0.157942,0.345428,0.798379,1.95908,44.6904,42.141,43.5248,
+
+POWER METHOD WITH BLAS
+Applying power method with alpha = 0.125
+Iterations: 12
+Dominant Eigenvalue: 578.272
+
+Applying power method with alpha = 0.25
+Iterations: 18
+Dominant Eigenvalue: 650.169
+
+Applying power method with alpha = 0.5
+Iterations: 33
+Dominant Eigenvalue: 809.34
+
+Applying power method with alpha = 1
+Iterations: 91
+Dominant Eigenvalue: 1183.13
+
+Applying power method with alpha = 1.5
+Iterations: 235
+Dominant Eigenvalue: 1614.88
+
+Applying power method with alpha = 2
+Iterations: 592
+Dominant Eigenvalue: 2084.33
+
+Applying power method with alpha = 4
+Iterations: 8531
+Dominant Eigenvalue: 4094.38
+
+Applying power method with alpha = 8
+Iterations: 11445
+Dominant Eigenvalue: 8184.43
+
+Applying power method with alpha = 16
+Iterations: 11895
+Dominant Eigenvalue: 16368.2
+
+Fewest iterations: 12
+For alpha: 0.125
+With eigenvalue: 578.272
+
+Most iterations: 11895
+For alpha: 16
+With eigenvalue: 16368.2
+
+RUNTIMES
+0.0648798,0.0674493,0.0793057,0.11138,0.182281,0.394793,4.71205,5.98574,6.11341,
