@@ -1,3 +1,38 @@
+Sender: LSF System <lsfadmin@eu-c7-046-11>
+Subject: Job 76717802: <./power_method> in cluster <euler> Done
+
+Job <./power_method> was submitted from host <eu-login-24-ng> by user <anruoss> in cluster <euler> at Wed Oct 31 00:52:51 2018
+Job was executed on host(s) <24*eu-c7-046-11>, in queue <normal.4h>, as user <anruoss> in cluster <euler> at Wed Oct 31 00:53:09 2018
+</cluster/home/anruoss> was used as the home directory.
+</cluster/home/anruoss/HPCSE-I/exercises/exercise05/power_method> was used as the working directory.
+Started at Wed Oct 31 00:53:09 2018
+Terminated at Wed Oct 31 02:31:51 2018
+Results reported at Wed Oct 31 02:31:51 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./power_method
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   5925.08 sec.
+    Max Memory :                                 524 MB
+    Average Memory :                             443.12 MB
+    Total Requested Memory :                     24576.00 MB
+    Delta Memory :                               24052.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                4
+    Run time :                                   5930 sec.
+    Turnaround time :                            5940 sec.
+
+The output (if any) follows:
+
 POWER METHOD WITHOUT BLAS
 Applying power method with alpha = 0.125
 Iterations: 12
@@ -44,7 +79,15 @@ For alpha: 16
 With eigenvalue: 16368.2
 
 RUNTIMES
-0.151362,0.117652,0.157942,0.345428,0.798379,1.95908,44.6904,42.141,43.5248,
+0.184422,0.183985,0.240986,0.39496,0.828765,1.96708,27.9098,37.2085,38.6394,
+
+Power Method for Large Matrices with alpha = 4
+Matrix size: 1024x1024
+Time: 27.7282
+Matrix size: 4096x4096
+Time: 822.765
+Matrix size: 8192x8192
+Time: 3973.55
 
 POWER METHOD WITH BLAS
 Applying power method with alpha = 0.125
@@ -60,11 +103,11 @@ Iterations: 33
 Dominant Eigenvalue: 809.34
 
 Applying power method with alpha = 1
-Iterations: 91
+Iterations: 90
 Dominant Eigenvalue: 1183.13
 
 Applying power method with alpha = 1.5
-Iterations: 235
+Iterations: 234
 Dominant Eigenvalue: 1614.88
 
 Applying power method with alpha = 2
@@ -72,24 +115,64 @@ Iterations: 592
 Dominant Eigenvalue: 2084.33
 
 Applying power method with alpha = 4
-Iterations: 8531
+Iterations: 8500
 Dominant Eigenvalue: 4094.38
 
 Applying power method with alpha = 8
-Iterations: 11445
+Iterations: 11508
 Dominant Eigenvalue: 8184.43
 
 Applying power method with alpha = 16
-Iterations: 11895
+Iterations: 11819
 Dominant Eigenvalue: 16368.2
 
 Fewest iterations: 12
 For alpha: 0.125
 With eigenvalue: 578.272
 
-Most iterations: 11895
+Most iterations: 11819
 For alpha: 16
 With eigenvalue: 16368.2
 
 RUNTIMES
-0.0648798,0.0674493,0.0793057,0.11138,0.182281,0.394793,4.71205,5.98574,6.11341,
+0.103869,0.0812387,0.0856434,0.102181,0.139427,0.234153,2.34219,3.14286,3.22722,
+
+Power Method for Large Matrices with alpha = 4
+Matrix size: 1024x1024
+Time: 2.14412
+Matrix size: 4096x4096
+Time: 169.652
+Matrix size: 8192x8192
+Time: 805.003
+
+DSYEV WITH LAPACK
+Applying dsyev with alpha = 0.125
+1st dominant eigenvalue: 578.272
+2nd dominant eigenvalue: 131.089
+Applying dsyev with alpha = 0.25
+1st dominant eigenvalue: 650.169
+2nd dominant eigenvalue: 257.193
+Applying dsyev with alpha = 0.5
+1st dominant eigenvalue: 809.34
+2nd dominant eigenvalue: 511.946
+Applying dsyev with alpha = 1
+1st dominant eigenvalue: 1183.13
+2nd dominant eigenvalue: 1022.89
+Applying dsyev with alpha = 1.5
+1st dominant eigenvalue: 1614.88
+2nd dominant eigenvalue: 1534.11
+Applying dsyev with alpha = 2
+1st dominant eigenvalue: 2084.33
+2nd dominant eigenvalue: 2045.35
+Applying dsyev with alpha = 4
+1st dominant eigenvalue: 4094.38
+2nd dominant eigenvalue: 4089.25
+Applying dsyev with alpha = 8
+1st dominant eigenvalue: 8184.43
+2nd dominant eigenvalue: 8176.41
+Applying dsyev with alpha = 16
+1st dominant eigenvalue: 16368.2
+2nd dominant eigenvalue: 16352.2
+RUNTIMES
+0.177895,0.168154,0.168499,0.168344,0.170396,0.168363,0.167653,0.167785,0.16776,
+
