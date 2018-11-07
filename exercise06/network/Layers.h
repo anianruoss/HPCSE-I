@@ -115,7 +115,7 @@ template <int nOutputs, int nInputs> struct LinearLayer : public Layer {
   void bckward(const std::vector<Activation *> &act,
                const std::vector<Params *> &param,
                const std::vector<Params *> &grad) const override {
-    // At this point, act[ID]->dError_dOutput contins derivative of error
+    // At this point, act[ID]->dError_dOutput contains derivative of error
     // with respect to the outputs of the network.
     const Real *const deltas = act[ID]->dError_dOutput; // batchSize * nOutputs
     const Real *const inputs = act[ID - 1]->output;     // batchSize * nInputs
@@ -139,7 +139,7 @@ template <int nOutputs, int nInputs> struct LinearLayer : public Layer {
       Real *const grad_W = grad[ID]->weights; // size nInputs * nOutputs
       std::fill(grad_W, grad_W + nInputs * nOutputs, 0.);
       gemm(CblasRowMajor, CblasTrans, CblasNoTrans, nInputs, nOutputs,
-           batchSize, 1., inputs, nInputs, deltas, batchSize, 0., grad_W,
+           batchSize, 1., inputs, nInputs, deltas, nOutputs, 0., grad_W,
            nOutputs);
     }
 
@@ -148,7 +148,7 @@ template <int nOutputs, int nInputs> struct LinearLayer : public Layer {
       Real *const errinp = act[ID - 1]->dError_dOutput; // batchSize * nInputs
       std::fill(errinp, errinp + batchSize * nInputs, 0.);
       gemm(CblasRowMajor, CblasNoTrans, CblasTrans, batchSize, nInputs,
-           nOutputs, 1., deltas, batchSize, weight, nOutputs, 0., errinp,
+           nOutputs, 1., deltas, nOutputs, weight, nOutputs, 0., errinp,
            nInputs);
     }
   }
