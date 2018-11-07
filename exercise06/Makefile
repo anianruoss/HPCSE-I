@@ -31,15 +31,15 @@ CXXFLAGS+= -Woverloaded-virtual -Wno-unused-parameter -Wno-unused-variable
 
 
 exec_testGrad: main_testGrad.o
-	$(CXX) $(CXXFLAGS) $(LIBS) main_testGrad.o -o $@
+	$(CXX) $(CXXFLAGS) $(LIBS) main_testGrad.o -o $@ -lopenblas
 	rm main_testGrad.o
 
 exec_linear: main_linear.o
-	$(CXX) $(CXXFLAGS) $(LIBS) main_linear.o -o $@
+	$(CXX) $(CXXFLAGS) $(LIBS) main_linear.o -o $@ -lopenblas
 	rm main_linear.o
 
 exec_nonlinear: main_nonlinear.o
-	$(CXX) $(CXXFLAGS) $(LIBS) main_nonlinear.o -o $@
+	$(CXX) $(CXXFLAGS) $(LIBS) main_nonlinear.o -o $@ -lopenblas
 	rm main_nonlinear.o
 
 all: exec_testGrad exec_linear exec_nonlinear

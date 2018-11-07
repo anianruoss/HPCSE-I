@@ -100,9 +100,16 @@ template <int nOutputs, int nInputs> struct LinearLayer : public Layer {
     // return matrix that contains layer's output
     Real *const output = act[ID]->output; // size is batchSize * nOutputs
 
-    // TODO : reset layer's output with the bias
+    // reset layers' output with the bias
+    for (int i = 0; i < batchSize; ++i) {
+      for (int j = 0; j < nOutputs; ++j) {
+        output[i * nOutputs + j] = bias[j];
+      }
+    }
 
-    // TODO : perform the forward step with gemm
+    // perform the forward step with gemm
+    gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, batchSize, nOutputs,
+         nInputs, 1., inputs, nInputs, weight, nOutputs, 1., output, nOutputs);
   }
 
   void bckward(const std::vector<Activation *> &act,
@@ -115,19 +122,34 @@ template <int nOutputs, int nInputs> struct LinearLayer : public Layer {
     const Real *const weight = param[ID]->weights;      // nInputs * nOutputs
     const int batchSize = act[ID]->batchSize;
 
-    // TODO: Implement BackProp to compute bias gradient: dError / dBias
+    // BackProp to compute bias gradient: dError / dBias
     {
       Real *const grad_B = grad[ID]->biases; // size nOutputs
+      std::fill(grad_B, grad_B + nOutputs, 0.);
+
+      for (int b = 0; b < batchSize; ++b) {
+        for (int i = 0; i < nOutputs; ++i) {
+          grad_B[i] += deltas[b * nOutputs + i];
+        }
+      }
     }
 
-    // TODO: Implement BackProp to compute weight gradient: dError / dWeights
+    // BackProp to compute weight gradient: dError / dWeights
     {
       Real *const grad_W = grad[ID]->weights; // size nInputs * nOutputs
+      std::fill(grad_W, grad_W + nInputs * nOutputs, 0.);
+      gemm(CblasRowMajor, CblasTrans, CblasNoTrans, nInputs, nOutputs,
+           batchSize, 1., inputs, nInputs, deltas, batchSize, 0., grad_W,
+           nOutputs);
     }
 
-    // TODO: Implement BackProp to compute dEdO of prev layer
+    // BackProp to compute dEdO of prev layer
     {
       Real *const errinp = act[ID - 1]->dError_dOutput; // batchSize * nInputs
+      std::fill(errinp, errinp + batchSize * nInputs, 0.);
+      gemm(CblasRowMajor, CblasNoTrans, CblasTrans, batchSize, nInputs,
+           nOutputs, 1., deltas, batchSize, weight, nOutputs, 0., errinp,
+           nInputs);
     }
   }
 
