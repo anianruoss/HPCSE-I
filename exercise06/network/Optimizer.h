@@ -30,7 +30,13 @@ struct MomentumSGD {
        Real *const mom1st, // parameter array gradient 1st moment
        Real *const mom2nd  // parameter array gradient 2nd moment (unused)
        ) const {
-    // TODO : Compute Momentum SGD update
+
+    // Momentum SGD update
+    for (int i = 0; i < size; ++i) {
+      mom1st[i] *= beta;
+      mom1st[i] -= eta * normalization * grad[i];
+      param[i] += mom1st[i];
+    }
   }
 };
 
