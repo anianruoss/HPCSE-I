@@ -186,7 +186,12 @@ template <int nOutputs> struct TanhLayer : public Layer {
     // return matrix that contains layer's output
     Real *const output = act[ID]->output; // size is batchSize * size
 
-    // TODO : Compute output
+    // perform the forward step with tanh
+    for (int b = 0; b < batchSize; ++b) {
+      for (int i = 0; i < size; ++i) {
+        output[b * size + i] = std::tanh(inputs[b * size + i]);
+      }
+    }
   }
 
   void bckward(const std::vector<Activation *> &act,
@@ -204,7 +209,14 @@ template <int nOutputs> struct TanhLayer : public Layer {
     Real *const errinp = act[ID - 1]->dError_dOutput; // size is batchSize *
                                                       // size
 
-    // TODO : compute dError / dOutput for previous layer
+    // compute dError / dOutput for previous layer
+    for (int b = 0; b < batchSize; ++b) {
+      for (int i = 0; i < size; ++i) {
+        errinp[b * size + i] =
+            deltas[b * size + i] *
+            (1. - std::pow(std::tanh(inputs[b * size + i]), 2.));
+      }
+    }
   }
 
   // no parameters to initialize;
