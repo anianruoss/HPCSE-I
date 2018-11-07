@@ -40,3 +40,6 @@ build/
 # virtualenv files
 venv/
 
+# data files
+*-ubyte
+
