@@ -101,6 +101,7 @@ template <int nOutputs, int nInputs> struct LinearLayer : public Layer {
     Real *const output = act[ID]->output; // size is batchSize * nOutputs
 
     // reset layers' output with the bias
+#pragma omp parallel for collapse(2)
     for (int i = 0; i < batchSize; ++i) {
       for (int j = 0; j < nOutputs; ++j) {
         output[i * nOutputs + j] = bias[j];
@@ -187,6 +188,7 @@ template <int nOutputs> struct TanhLayer : public Layer {
     Real *const output = act[ID]->output; // size is batchSize * size
 
     // perform the forward step with tanh
+#pragma omp parallel for collapse(2)
     for (int b = 0; b < batchSize; ++b) {
       for (int i = 0; i < size; ++i) {
         output[b * size + i] = std::tanh(inputs[b * size + i]);
@@ -210,6 +212,7 @@ template <int nOutputs> struct TanhLayer : public Layer {
                                                       // size
 
     // compute dError / dOutput for previous layer
+#pragma omp parallel for collapse(2)
     for (int b = 0; b < batchSize; ++b) {
       for (int i = 0; i < size; ++i) {
         errinp[b * size + i] =

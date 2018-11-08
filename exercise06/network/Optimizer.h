@@ -32,6 +32,7 @@ struct MomentumSGD {
        ) const {
 
     // Momentum SGD update
+#pragma omp parallel for
     for (int i = 0; i < size; ++i) {
       mom1st[i] *= beta;
       mom1st[i] -= eta * normalization * grad[i];
@@ -81,6 +82,7 @@ template <typename Algorithm> struct Optimizer {
     const Algorithm algo(eta, batchSize, beta_1, beta_2, lambda);
 
     // ... loop over all parameter arrays and compute the update:
+#pragma omp parallel for
     for (size_t j = 0; j < parms.size(); j++) {
       if (parms[j] == nullptr)
         continue; // layer does not have parameters

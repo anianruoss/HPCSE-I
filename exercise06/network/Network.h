@@ -53,6 +53,7 @@ struct Network
     const int inputLayerSize = workspace[layerStart]->layersSize;
 
     //copy input onto output of input layer:
+#pragma omp parallel for
     for (size_t b=0; b<batchSize; b++)
     {
       assert(I[b].size() == (size_t) inputLayerSize );
@@ -72,6 +73,7 @@ struct Network
     // copy output into vector of vectors: one vector for each element of batch
     std::vector<std::vector<Real>> O(batchSize, std::vector<Real>(nOutputs, 0));
 
+#pragma omp parallel for
     for (size_t b=0; b<batchSize; b++)
     {
       assert(nOutputs == workspace.back()->layersSize);
@@ -107,6 +109,7 @@ struct Network
     for(auto& p : workspace) p->clearErrors();
 
     //copy input onto output of input layer:
+#pragma omp parallel for
     for (size_t b=0; b<batchSize; b++)
     {
       assert(E[b].size() == (size_t) nOutputs);
