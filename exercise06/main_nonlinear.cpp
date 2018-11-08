@@ -87,16 +87,24 @@ int main (int argc, char** argv)
       // Put `batchsize` samples in the inputs vector-of-vectors. Start from
       // the end because it's easier to remove entries from a vectors's end.
       std::vector<std::vector<Real>> INP(batchsize, std::vector<Real>(28*28));
-      
+
+#pragma omp parallel for
       for (int i = 0; i < batchsize; i++)
       {
-        prepare_input(dataset.training_images[sample_ids.back()], INP[i]);
-        sample_ids.pop_back();
+        int back;
+#pragma omp critical
+        {
+            back = sample_ids.back();
+            sample_ids.pop_back();
+        }
+
+        prepare_input(dataset.training_images[back], INP[i]);
       }
       
       const std::vector<std::vector<Real>> OUT = net.forward(INP);
       
       // Compute the error = 1/2 \Sum (OUT - INP) ^ 2
+#pragma omp parallel for reduction (+: epoch_mse)
       for (int i = 0; i < batchsize; i++)
       {
         // For simplicity here we overwrite INP with the gradient of the error
@@ -119,7 +127,8 @@ int main (int argc, char** argv)
       Real test_mse = 0;
       for (int step = 0; step < steps_in_test; step++)
       {
-        
+
+#pragma omp parallel for
         for (int i = 0; i < batchsize; i++)
         {
           const int sample = i + batchsize * step;
@@ -127,7 +136,8 @@ int main (int argc, char** argv)
         }
         
         const std::vector<std::vector<Real>> OUT = net.forward(INP);
-        
+
+#pragma omp parallel for reduction (+: test_mse)
         for (int i = 0; i < batchsize; i++)
           test_mse += compute_error(OUT[i], INP[i]); //now input contains err
       }

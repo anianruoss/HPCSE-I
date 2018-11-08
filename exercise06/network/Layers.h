@@ -128,8 +128,10 @@ template <int nOutputs, int nInputs> struct LinearLayer : public Layer {
       Real *const grad_B = grad[ID]->biases; // size nOutputs
       std::fill(grad_B, grad_B + nOutputs, 0.);
 
+#pragma omp parallel for collapse(2)
       for (int b = 0; b < batchSize; ++b) {
         for (int i = 0; i < nOutputs; ++i) {
+#pragma omp atomic
           grad_B[i] += deltas[b * nOutputs + i];
         }
       }
