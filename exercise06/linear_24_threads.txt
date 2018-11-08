@@ -1,0 +1,12 @@
+MNIST data directory: ./
+(0) Input Layer of sizes Output:784
+(1) Linear Layer of Input:784 Output:10
+(2) Linear Layer of Input:10 Output:784
+Training set MSE:24.755555, Test set MSE:19.293206
+Training set MSE:13.634938, Test set MSE:13.472849
+Training set MSE:13.520423, Test set MSE:13.379069
+
+real	0m58.729s
+user	23m2.021s
+sys	0m3.105s
+

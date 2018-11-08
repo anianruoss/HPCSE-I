@@ -1,0 +1,17 @@
+MNIST data directory: ./
+(0) Input Layer of sizes Output:784
+(1) Linear Layer of Input:784 Output:100
+(2) Tanh Layer of size Output:100
+(3) Linear Layer of Input:100 Output:10
+(4) Tanh Layer of size Output:10
+(5) Linear Layer of Input:10 Output:100
+(6) Tanh Layer of size Output:100
+(7) Linear Layer of Input:100 Output:784
+Training set MSE:24.796162, Test set MSE:20.401777
+Training set MSE:13.662475, Test set MSE:13.499720
+Training set MSE:13.538913, Test set MSE:13.395712
+
+real	3m11.015s
+user	37m43.854s
+sys	0m16.178s
+
