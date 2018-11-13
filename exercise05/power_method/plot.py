@@ -27,7 +27,7 @@ plt.savefig('run_times.png', bbox_inches='tight')
 plt.close()
 
 speedup_blas = np.divide(run_times_no_blas, run_times_blas)
-speedup_lapack = np.divide(run_times_blas, run_times_lapack)
+speedup_lapack = np.divide(run_times_lapack, run_times_blas)
 
 plt.plot(alphas, speedup_blas, 'r+:', label='$t_{manual}/t_{power}$')
 plt.plot(alphas, speedup_lapack, 'b+:', label='$t_{power}/t_{ev\_full}$')
