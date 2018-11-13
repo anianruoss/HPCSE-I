@@ -16,6 +16,8 @@ if (OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif ()
 find_package(BLAS REQUIRED)
+find_package(MKL REQUIRED)
+include_directories(${MKL_INCLUDE_DIRS})
 
 add_subdirectory(utils)
 include_directories(utils)
