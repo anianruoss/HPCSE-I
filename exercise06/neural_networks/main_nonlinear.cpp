@@ -10,9 +10,9 @@
  */
 
 
-#include "exercise06/network/Network.h"
-#include "exercise06/network/Optimizer.h"
-#include "exercise06/mnist/mnist_reader.hpp"
+#include "network/Network.h"
+#include "network/Optimizer.h"
+#include "mnist/mnist_reader.hpp"
 #include <chrono>
 
 static void prepare_input(const std::vector<int>& image, std::vector<Real>& input)

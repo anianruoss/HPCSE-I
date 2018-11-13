@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-import os, pathlib, sys
-from glob import glob
-import numpy as np
+import pathlib
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 p = pathlib.Path('./')
 for comp in list(p.glob('component_*.raw')):
