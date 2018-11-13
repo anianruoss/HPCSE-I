@@ -10,9 +10,9 @@
  */
 
 
-#include "network/Network.h"
-#include "network/Optimizer.h"
-#include "mnist/mnist_reader.hpp"
+#include "exercise06/network/Network.h"
+#include "exercise06/network/Optimizer.h"
+#include "exercise06/mnist/mnist_reader.hpp"
 #include <chrono>
 
 static void prepare_input(const std::vector<int>& image, std::vector<Real>& input)
@@ -56,12 +56,15 @@ int main (int argc, char** argv)
   Network net;
   // layer 0: input
   net.addInput<28*28*1>();
-  // layer 1: linear encoder
-  net.addLinear<28*28*1, Z>();
-  // layer 2: linear decoder
-  net.addLinear<Z, 28*28*1>();
+  net.addLinear<28*28*1, 100>();
+  net.addTanh<100>();
+  net.addLinear<100, Z>();
+  net.addTanh<Z>();
+  net.addLinear<Z, 100>();
+  net.addTanh<100>();
+  net.addLinear<100, 28*28*1>();
 
-  const size_t compressionID = 1; // ID of layer whose size is Z
+  const size_t compressionID = 4; // ID of layer whose size is Z
 
   //Create optimizer:
   Optimizer<MomentumSGD> opt(net, learn_rate);
@@ -74,10 +77,10 @@ int main (int argc, char** argv)
     std::vector<int> sample_ids(n_train_samp);
     //fill array: 0, 1, ..., n_train_samp-1
     std::iota(sample_ids.begin(), sample_ids.end(), 0);
-
+    
     //shuffle dataset in order to sample random mini batches:
     std::shuffle(sample_ids.begin(), sample_ids.end(), net.gen );
-
+    
     Real epoch_mse = 0;
     for (int step = 0; step < steps_in_epoch; step++)
     {
@@ -88,19 +91,20 @@ int main (int argc, char** argv)
 #pragma omp parallel for
       for (int i = 0; i < batchsize; i++)
       {
-          int back;
+        int back;
 #pragma omp critical
         {
-          back = sample_ids.back();
-          sample_ids.pop_back();
+            back = sample_ids.back();
+            sample_ids.pop_back();
         }
+
         prepare_input(dataset.training_images[back], INP[i]);
       }
-
+      
       const std::vector<std::vector<Real>> OUT = net.forward(INP);
-
+      
       // Compute the error = 1/2 \Sum (OUT - INP) ^ 2
-#pragma omp parallel for reduction(+: epoch_mse)
+#pragma omp parallel for reduction (+: epoch_mse)
       for (int i = 0; i < batchsize; i++)
       {
         // For simplicity here we overwrite INP with the gradient of the error
@@ -109,17 +113,17 @@ int main (int argc, char** argv)
         const Real error = compute_error(OUT[i], INP[i]); //now INP contains ERR
         epoch_mse += error;
       }
-
+      
       net.bckward(INP);
-
+      
       opt.update(batchsize);
     }
-
+    
     if(iepoch % 10 == 0)
     {
       const int steps_in_test = n_test_samp / batchsize;
       std::vector<std::vector<Real>> INP(batchsize, std::vector<Real>(28*28));
-
+      
       Real test_mse = 0;
       for (int step = 0; step < steps_in_test; step++)
       {
@@ -130,7 +134,7 @@ int main (int argc, char** argv)
           const int sample = i + batchsize * step;
           prepare_input(dataset.test_images[sample], INP[i]);
         }
-
+        
         const std::vector<std::vector<Real>> OUT = net.forward(INP);
 
 #pragma omp parallel for reduction (+: test_mse)
@@ -138,19 +142,19 @@ int main (int argc, char** argv)
           test_mse += compute_error(OUT[i], INP[i]); //now input contains err
       }
       printf("Training set MSE:%f, Test set MSE:%f\n",
-        epoch_mse/steps_in_epoch/batchsize, test_mse/steps_in_test/batchsize);
+             epoch_mse/steps_in_epoch/batchsize, test_mse/steps_in_test/batchsize);
     }
   }
 
   //extract features:
   // WARNING: if you change the shape of the net in any way, this will fail.
   // If you add layers, edit the `compressionID` variable accordingly.
-  for (int z = 0; z < Z; z++)
+  for (int z = 0; z < 2 * Z; z++)
   {
     // initialize layer output of all zeros:
     std::vector<Real> z_vec(Z, 0);
     // turn on only one component in the compression layer
-    z_vec[z] = 1;
+    z_vec[z % Z] = z >= Z ? -1 : 1;
 
     const std::vector<Real> OUT = net.forward(z_vec, compressionID);
     std::vector<float> OUT_float(OUT.size());
