@@ -49,22 +49,18 @@ int main (int argc, char** argv)
 
   //            (input img)  (conv filter)  (stride)
   //             nx, ny, nc  nfx, nfy, nfc         (padding)
-  net.addConv2D< 28, 28,  1,   8,   8,   4,   2,2,    0,0>();
-  // output of first conv has sizes (28 -8 +2*0)/2+1 = 11
-  net.addLReLu< 11 * 11 * 4 >();
+  net.addConv2D< 28, 28,  1,   6,   6,  32,   2,2,    2,2>();
+  // output of first conv has sizes (28 - 6 + 2*2)/2 + 1 = 14
+  net.addLReLu< 14 * 14 * 32 >();
 
-  net.addConv2D< 11, 11,  4,   6,   6,   8,   1,1,    0,0>();
-  // output of first conv has sizes (11 -6 +2*0)/1+1 = 6
-  net.addLReLu< 6 * 6 * 8 >();
+  net.addConv2D< 14, 14,  32,   6,   6,   64,   2,2,    2,2>();
+  // output of first conv has sizes (14 - 6 + 2*2)/2 + 1 = 7
+  net.addLReLu< 7 * 7 * 64 >();
 
-  net.addConv2D<  6,  6,  8,   4,   4,  16,   1,1,    0,0>();
-  // output of first conv has sizes ( 6 -4 +2*0)/1+1 = 3
-  net.addLReLu< 3 * 3 * 16 >();
+  net.addLinear< 7 * 7 * 64, 1024 >();
+  net.addLReLu< 1024 >();
+  net.addLinear< 1024, 10 >();
 
-  net.addConv2D<  3,  3, 16,   3,   3,  10,   1,1,    0,0>();
-  // output of first conv has sizes ( 3 -3 +2*0)/1+1 = 1
-  // therefore i have 10 color channels with 1by1 pixel each
-  // Same as fully connected with 10 outputs: one output per number
   // Softmax maps unbounded input to "probability"-like output
   net.addSoftMax<10>();
 

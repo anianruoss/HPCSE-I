@@ -38,7 +38,11 @@ exec_classify: main_classify.o
 	$(CXX) $(CXXFLAGS) $(LIBS) main_classify.o -o $@ -lopenblas
 	rm main_classify.o
 
-all: exec_testGrad exec_classify
+exec_classify_improved: main_classify_improved.o
+	$(CXX) $(CXXFLAGS) $(LIBS) main_classify_improved.o -o $@ -lopenblas
+	rm main_classify_improved.o
+
+all: exec_testGrad exec_classify exec_classify_improved
 .DEFAULT_GOAL := all
 
 %.o: %.cpp
