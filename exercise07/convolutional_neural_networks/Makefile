@@ -31,11 +31,11 @@ CXXFLAGS+= -Woverloaded-virtual -Wno-unused-parameter -Wno-unused-variable
 
 
 exec_testGrad: main_testGrad.o
-	$(CXX) $(CXXFLAGS) $(LIBS) main_testGrad.o -o $@
+	$(CXX) $(CXXFLAGS) $(LIBS) main_testGrad.o -o $@ -lopenblas
 	rm main_testGrad.o
 
 exec_classify: main_classify.o
-	$(CXX) $(CXXFLAGS) $(LIBS) main_classify.o -o $@
+	$(CXX) $(CXXFLAGS) $(LIBS) main_classify.o -o $@ -lopenblas
 	rm main_classify.o
 
 all: exec_testGrad exec_classify

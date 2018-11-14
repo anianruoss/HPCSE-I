@@ -49,8 +49,15 @@ struct Conv2DLayer : public Layer {
     const Real *const INP = act[ID - 1]->output;
     Real *const OUT = act[ID]->output;
 
-    printf("TODO: Conv2DLayer::forward\n");
-    abort();
+    for (int i = 0; i < batchSize * OpY * OpX; ++i) {
+      for (int j = 0; j < KnC; ++j) {
+        OUT[i * KnC + j] = param[ID]->biases[j];
+      }
+    }
+
+    gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, batchSize * OpY * OpX, KnC,
+         KnY * KnX * InC, 1., INP, KnY * KnX * InC, param[ID]->weights, KnC, 1.,
+         OUT, KnC);
   }
 
   void bckward(const std::vector<Activation *> &act,
@@ -59,8 +66,35 @@ struct Conv2DLayer : public Layer {
     const int batchSize = act[ID]->batchSize;
     const Real *const dEdO = act[ID]->dError_dOutput;
 
-    printf("TODO: Conv2DLayer::bckward\n");
-    abort();
+    // BackProp to compute bias gradient: dError / dBias
+    {
+      Real *const grad_B = grad[ID]->biases;
+      std::fill(grad_B, grad_B + KnC, 0.);
+
+      for (int i = 0; i < batchSize * OpY * OpX; ++i) {
+        for (int j = 0; j < KnC; ++j) {
+          grad_B[j] += dEdO[i * KnC + j];
+        }
+      }
+    }
+
+    // BackProp to compute weight gradient: dError / dWeights
+    {
+      Real *const grad_W = grad[ID]->weights;
+      std::fill(grad_W, grad_W + KnY * KnX * InC * KnC, 0);
+      gemm(CblasRowMajor, CblasTrans, CblasNoTrans, KnY * KnX * InC, KnC,
+           batchSize * OpY * OpX, 1., act[ID - 1]->output, KnY * KnX * InC,
+           dEdO, KnC, 0., grad_W, KnC);
+    }
+
+    // BackProp to compute dEdO of prev layer
+    {
+      Real *const errinp = act[ID - 1]->dError_dOutput;
+      std::fill(errinp, errinp + batchSize * OpY * OpX * KnY * KnX * InC, 0.);
+      gemm(CblasRowMajor, CblasNoTrans, CblasTrans, batchSize * OpY * OpX,
+           KnY * KnX * InC, KnC, 1., dEdO, KnC, param[ID]->weights, KnC, 0.,
+           errinp, KnY * KnX * InC);
+    }
   }
 
   void init(std::mt19937 &gen,

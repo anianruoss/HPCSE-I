@@ -87,8 +87,27 @@ struct Im2MatLayer : public Layer {
     memset(lin_out, 0, BS * OpY * OpX * KnY * KnX * InC * sizeof(Real));
 #endif
 
-    printf("TODO: Im2MatLayer::Im2Mat\n");
-    abort();
+    for (int bc = 0; bc < BS; ++bc) {
+      for (int oy = 0; oy < OpY; ++oy) {
+        for (int ox = 0; ox < OpX; ++ox) {
+          for (int fy = 0; fy < KnY; ++fy) {
+            for (int fx = 0; fx < KnX; ++fx) {
+              // index along input map of the convolution op
+              const int ix = ox * Sx - Px + fx;
+              const int iy = oy * Sy - Py + fy;
+              // padding: skip addition if outside input boundaries
+              if (ix < 0 || ix >= InX || iy < 0 || iy >= InY) {
+                continue;
+              }
+
+              for (int ic = 0; ic < InC; ++ic) {
+                OUT[bc][oy][ox][fy][fx][ic] = INP[bc][iy][ix][ic];
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   void Mat2Im(const int BS, const Real *const lin_inp,
@@ -111,8 +130,27 @@ struct Im2MatLayer : public Layer {
     memset(lin_out, 0, BS * InY * InX * InC * sizeof(Real));
 #endif
 
-    printf("TODO: Im2MatLayer::Mat2Im\n");
-    abort();
+    for (int bc = 0; bc < BS; ++bc) {
+      for (int oy = 0; oy < OpY; ++oy) {
+        for (int ox = 0; ox < OpX; ++ox) {
+          for (int fy = 0; fy < KnY; ++fy) {
+            for (int fx = 0; fx < KnX; ++fx) {
+              // index along input map of the convolution op
+              const int ix = ox * Sx - Px + fx;
+              const int iy = oy * Sy - Py + fy;
+              // padding: skip addition if outside input boundaries
+              if (ix < 0 || ix >= InX || iy < 0 || iy >= InY) {
+                continue;
+              }
+
+              for (int ic = 0; ic < InC; ++ic) {
+                dLdINP[bc][iy][ix][ic] += dLdOUT[bc][oy][ox][fy][fx][ic];
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   void init(std::mt19937 &G, const std::vector<Params *> &P) const override {}
