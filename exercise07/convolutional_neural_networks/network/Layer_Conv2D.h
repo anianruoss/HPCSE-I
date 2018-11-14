@@ -49,12 +49,15 @@ struct Conv2DLayer : public Layer {
     const Real *const INP = act[ID - 1]->output;
     Real *const OUT = act[ID]->output;
 
+    // reset layers' output with the bias
+#pragma omp parallel for collapse(2)
     for (int i = 0; i < batchSize * OpY * OpX; ++i) {
       for (int j = 0; j < KnC; ++j) {
         OUT[i * KnC + j] = param[ID]->biases[j];
       }
     }
 
+    // perform the forward step with gemm
     gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, batchSize * OpY * OpX, KnC,
          KnY * KnX * InC, 1., INP, KnY * KnX * InC, param[ID]->weights, KnC, 1.,
          OUT, KnC);
@@ -71,8 +74,10 @@ struct Conv2DLayer : public Layer {
       Real *const grad_B = grad[ID]->biases;
       std::fill(grad_B, grad_B + KnC, 0.);
 
+#pragma omp parallel for collapse(2)
       for (int i = 0; i < batchSize * OpY * OpX; ++i) {
         for (int j = 0; j < KnC; ++j) {
+#pragma omp atomic
           grad_B[j] += dEdO[i * KnC + j];
         }
       }

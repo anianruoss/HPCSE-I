@@ -87,6 +87,7 @@ struct Im2MatLayer : public Layer {
     memset(lin_out, 0, BS * OpY * OpX * KnY * KnX * InC * sizeof(Real));
 #endif
 
+#pragma omp parallel for collapse(5)
     for (int bc = 0; bc < BS; ++bc) {
       for (int oy = 0; oy < OpY; ++oy) {
         for (int ox = 0; ox < OpX; ++ox) {
@@ -130,6 +131,7 @@ struct Im2MatLayer : public Layer {
     memset(lin_out, 0, BS * InY * InX * InC * sizeof(Real));
 #endif
 
+#pragma omp parallel for collapse(5)
     for (int bc = 0; bc < BS; ++bc) {
       for (int oy = 0; oy < OpY; ++oy) {
         for (int ox = 0; ox < OpX; ++ox) {

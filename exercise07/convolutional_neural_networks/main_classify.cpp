@@ -91,6 +91,7 @@ int main (int argc, char** argv)
       // the end because it's easier to remove entries from a vectors's end.
       std::vector<std::vector<Real>> INP(batchsize, std::vector<Real>(28*28));
 
+#pragma omp parallel for
       for (int i = 0; i < batchsize; i++)
       {
         const int sample = sample_ids[sample_ids.size() - 1 - i];
@@ -99,6 +100,7 @@ int main (int argc, char** argv)
 
       std::vector<std::vector<Real>> OUT = net.forward(INP);
 
+#pragma omp parallel for reduction(-: epoch_mse) reduction(+: epoch_prec)
       for (int i = 0; i < batchsize; i++)
       {
         // For simplicity here we overwrite OUT with the gradient of the error
@@ -126,7 +128,7 @@ int main (int argc, char** argv)
       sample_ids.erase(sample_ids.end()-batchsize, sample_ids.end());
     }
 
-    if(iepoch % 1 == 0)
+    if(iepoch % 10 == 0)
     {
       const int steps_in_test = n_test_samp / batchsize;
       std::vector<std::vector<Real>> INP(batchsize, std::vector<Real>(28*28));
@@ -136,6 +138,7 @@ int main (int argc, char** argv)
       for (int step = 0; step < steps_in_test; step++)
       {
 
+#pragma omp parallel for
         for (int i = 0; i < batchsize; i++)
         {
           const int sample = i + batchsize * step;
@@ -144,6 +147,7 @@ int main (int argc, char** argv)
 
         std::vector<std::vector<Real>> OUT = net.forward(INP);
 
+#pragma omp parallel for reduction(-: test_mse) reduction(+: test_prec)
         for (int i = 0; i < batchsize; i++) {
           const int sample = i + batchsize * step;
           const uint8_t label = dataset.test_labels[sample];
