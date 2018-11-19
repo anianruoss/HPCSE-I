@@ -1,5 +1,4 @@
-# TODO a): Set the compiler
-CXX=
+CXX=mpic++
 CXXFLAGS+=-std=c++11 -Wall -Wpedantic -O3
 
 main: main.o
