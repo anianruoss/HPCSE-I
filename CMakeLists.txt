@@ -18,6 +18,8 @@ endif ()
 find_package(BLAS REQUIRED)
 find_package(MKL REQUIRED)
 include_directories(${MKL_INCLUDE_DIRS})
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
 
 add_subdirectory(utils)
 include_directories(utils)
