@@ -4,19 +4,33 @@
 #include <mpi.h>
 #include <random>
 
-inline long exact(const long N) {
-  // TODO b): Implement the analytical solution.
-  return 0;
-}
+inline long exact(const long N) { return N * (N + 1) / 2; }
 
-void reduce_mpi(const int rank, long &sum) {
-  // TODO e): Perform the reduction using blocking collectives.
+void reduce_mpi(long &sum, long &totSum) {
+  MPI_Reduce(&sum, &totSum, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 }
 
 // PRE: size is a power of 2 for simplicity
 void reduce_manual(int rank, int size, long &sum) {
-  // TODO f): Implement a tree based reduction using blocking point-to-point
-  // communication.
+  // shortcut for single rank
+  if (1 < size) {
+    int prevSize;
+    long otherSum;
+
+    while (1 < size) {
+      prevSize = size;
+      size /= 2;
+
+      if (size <= rank and rank < prevSize) {
+        MPI_Send(&sum, 1, MPI_LONG, rank - size, rank, MPI_COMM_WORLD);
+        // printf("size %d: rank %d send to %d \n", size, rank, rank - size);
+      } else if (rank < size) {
+        MPI_Recv(&otherSum, 1, MPI_LONG, rank + size, rank + size,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        sum += otherSum;
+      }
+    }
+  }
 }
 
 int main(int argc, char **argv) {
@@ -24,8 +38,9 @@ int main(int argc, char **argv) {
 
   // Initialize MPI
   int rank, size;
-  // TODO c): Initialize MPI and obtain the rank and the number of processes
-  // (size)
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
 
   // -------------------------
   // Perform the local sum:
@@ -34,11 +49,8 @@ int main(int argc, char **argv) {
 
   // Determine work load per rank
   long N_per_rank = N / size;
-
-  // TODO d): Determine the range of the subsum that should be calculated by
-  // this rank.
-  long N_start;
-  long N_end;
+  long N_start = rank * N_per_rank;
+  long N_end = rank == (size - 1) ? N : (rank + 1) * N_per_rank - 1;
 
   // N_start + (N_start+1) + ... + (N_start+N_per_rank-1)
   for (long i = N_start; i <= N_end; ++i) {
@@ -48,20 +60,24 @@ int main(int argc, char **argv) {
   // -------------------------
   // Reduction
   // -------------------------
-  reduce_mpi(rank, sum);
-  // reduce_manual(rank, size, sum);
+  long mpi_sum = 0;
+  reduce_mpi(sum, mpi_sum);
+  reduce_manual(rank, size, sum);
 
   // -------------------------
   // Print the result
   // -------------------------
   if (rank == 0) {
-    std::cout << std::left << std::setw(25)
+    std::cout << std::left << std::setw(35)
               << "Final result (exact): " << exact(N) << std::endl;
-    std::cout << std::left << std::setw(25) << "Final result (MPI): " << sum
-              << std::endl;
+    std::cout << std::left << std::setw(35)
+              << "Final result (MPI Collective): " << mpi_sum << std::endl;
+    std::cout << std::left << std::setw(35)
+              << "Final result (MPI tree): " << sum << std::endl;
   }
+
   // Finalize MPI
-  // TODO c): Finalize MPI
+  MPI_Finalize();
 
   return 0;
 }
