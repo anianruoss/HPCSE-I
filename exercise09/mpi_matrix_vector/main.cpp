@@ -1,15 +1,15 @@
 #include <cassert>
+#include <iostream>
 #include <map>
 #include <mpi.h>
-#include <iostream>
 
 #include "def.h"
 #include "index.h"
-#include "op.h"
 #include "io.h"
+#include "op.h"
 
 // Adds vectors.
-Vect Add(const Vect& a, const Vect& b) {
+Vect Add(const Vect &a, const Vect &b) {
   auto r = a;
   for (Size i = 0; i < a.v.size(); ++i) {
     r.v[i] += b.v[i];
@@ -18,16 +18,16 @@ Vect Add(const Vect& a, const Vect& b) {
 }
 
 // Multiplies vector and scalar.
-Vect Mul(const Vect& a, Real k) {
+Vect Mul(const Vect &a, Real k) {
   auto r = a;
-  for (auto& e : r.v) {
+  for (auto &e : r.v) {
     e *= k;
   }
   return r;
 }
 
 // Multiplies matrix and vector.
-Vect Mul(const Matr& a, const Vect& u, MPI_Comm comm) {
+Vect Mul(const Matr &a, const Vect &u, MPI_Comm comm) {
   // TODO 2a
 
   return u;
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     Real dx = x - 0.5;
     Real dy = y - 0.5;
     Real r = 0.2;
-    u.v.push_back(dx*dx + dy*dy < r*r ? 1. : 0.);
+    u.v.push_back(dx * dx + dy * dy < r * r ? 1. : 0.);
   }
 
   Write(u, comm, "u0");
