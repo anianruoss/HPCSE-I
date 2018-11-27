@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mpi.h>
-#include <iostream>
 #include <fstream>
-#include <vector>
+#include <iostream>
+#include <mpi.h>
 #include <string>
+#include <vector>
 
 // Prints std::vector as space-separated list.
 template <class T>
-std::ostream& operator<<(std::ostream& o, const std::vector<T>& v) {
+std::ostream &operator<<(std::ostream &o, const std::vector<T> &v) {
   std::string p = "";
   for (auto a : v) {
     o << p << a;
@@ -18,7 +18,7 @@ std::ostream& operator<<(std::ostream& o, const std::vector<T>& v) {
 }
 
 // Prints matrix to stream.
-void Print0(const Matr& a, std::ostream& o) {
+void Print0(const Matr &a, std::ostream &o) {
   for (Size i = 0; i < L; ++i) {
     o << i << ":";
     for (Size k = a.ki[i]; k < a.ki[i + 1]; ++k) {
@@ -30,7 +30,7 @@ void Print0(const Matr& a, std::ostream& o) {
 }
 
 // Prints matrix to stream, with synchronization.
-void Print(const Matr& a, std::ostream& o, MPI_Comm comm) {
+void Print(const Matr &a, std::ostream &o, MPI_Comm comm) {
   int r, nr;
   MPI_Comm_rank(comm, &r);
   MPI_Comm_size(comm, &nr);
@@ -45,18 +45,18 @@ void Print(const Matr& a, std::ostream& o, MPI_Comm comm) {
 }
 
 // Prints vector to stream.
-void Print0(const Vect& u, int r, std::ostream& o) {
+void Print0(const Vect &u, int r, std::ostream &o) {
   for (Size i = 0; i < L; ++i) {
     auto gi = LocToGlb(i, r);
     auto xy = GlbToCoord(gi);
-    o << Real(xy[0] + 0.5) / NX << " " << Real(xy[1] + 0.5) / NX 
-        << " " << u.v[i] << "\n";
+    o << Real(xy[0] + 0.5) / NX << " " << Real(xy[1] + 0.5) / NX << " "
+      << u.v[i] << "\n";
   }
   o.flush();
 }
 
 // Prints vector to stream, with synchronization.
-void Print(const Vect& u, MPI_Comm comm, std::ostream& o) {
+void Print(const Vect &u, MPI_Comm comm, std::ostream &o) {
   int r, nr;
   MPI_Comm_rank(comm, &r);
   MPI_Comm_size(comm, &nr);
@@ -71,7 +71,7 @@ void Print(const Vect& u, MPI_Comm comm, std::ostream& o) {
 
 // Writes vector to file.
 // fn: filename
-void Write(const Vect& u, MPI_Comm comm, std::string fn) {
+void Write(const Vect &u, MPI_Comm comm, std::string fn) {
   int r, nr;
   MPI_Comm_rank(comm, &r);
   MPI_Comm_size(comm, &nr);
@@ -90,8 +90,6 @@ void Write(const Vect& u, MPI_Comm comm, std::string fn) {
 
 // Writes vector to file.
 // fn: filename
-void WriteMpi(const Vect& u, MPI_Comm comm, std::string fn) {
+void WriteMpi(const Vect &u, MPI_Comm comm, std::string fn) {
   // TODO 2b
 }
-
-
