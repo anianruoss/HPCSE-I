@@ -6,8 +6,8 @@
 using Real = double;
 using Size = size_t;
 
-const MPI_Datatype MS = MPI_UNSIGNED_LONG;
-const MPI_Datatype MR = MPI_DOUBLE;
+MPI_Datatype MS = MPI_UNSIGNED_LONG;
+MPI_Datatype MR = MPI_DOUBLE;
 
 // grid size
 const Size N = 64;
