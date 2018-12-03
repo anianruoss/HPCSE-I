@@ -71,7 +71,7 @@ void Print(const Vect &u, MPI_Comm comm, std::ostream &o) {
 
 // Writes vector to file.
 // fn: filename
-void Write(const Vect &u, MPI_Comm comm, std::string &fn) {
+void Write(const Vect &u, MPI_Comm comm, const std::string &fn) {
   int r, nr;
   MPI_Comm_rank(comm, &r);
   MPI_Comm_size(comm, &nr);
@@ -90,7 +90,7 @@ void Write(const Vect &u, MPI_Comm comm, std::string &fn) {
 
 // Writes vector to file.
 // fn: filename
-void WriteMpi(const Vect &u, MPI_Comm comm, std::string &fn) {
+void WriteMpi(const Vect &u, MPI_Comm comm, const std::string &fn) {
   int rank, size;
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &size);
