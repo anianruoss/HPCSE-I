@@ -116,7 +116,9 @@ Vect Mul(const Matr &a, const Vect &u, MPI_Comm comm) {
     }
   }
 
+  // after this point all messages have been sent
   MPI_Waitall(static_cast<int>(num_requests), requests, statuses);
+  MPI_Barrier(comm);
 
   // process elements from other ranks
   std::vector<Size> cur_index(static_cast<Size>(size), 0);
