@@ -20,6 +20,8 @@ find_package(MKL REQUIRED)
 include_directories(${MKL_INCLUDE_DIRS})
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
+find_package(ZFP REQUIRED)
+include_directories(${ZFP_INCLUDE_DIR})
 
 add_subdirectory(utils)
 include_directories(utils)
