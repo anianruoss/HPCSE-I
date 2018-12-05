@@ -67,41 +67,50 @@ void write_data(const string &fname, const unsigned char *const cbuf,
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   const bool isroot = (0 == rank);
 
-  // file headers (refer to the struct's above to see their contents)
-  // TODO: compute global file header and local block headers:
-  // 1.) fill file header structure
-  // 2.) compute block header start and end offsets (for convenience, that is
-  //     the start f and end bp in bytes [see above for meaning of f and bp])
-  // 3.) determine local offsets of compressed blocks, that is byte offset ck
-  //     for rank k.  The number of bytes for the compressed blocks can be
-  //     different on each rank.
-  // 4.) fill block header
-
-  // 1.)
+  // fill file header structure
   FileHeader fheader;
+  fheader.tol = tol;
+  fheader.Nx = Nx;
+  fheader.Ny = Ny;
+  fheader.Nb = static_cast<size_t>(size);
 
-  // 2.)
+  // compute block header start and end offsets (for convenience, that is the
+  // start f and end bp in bytes [see above for meaning of f and bp])
+  size_t f = sizeof(FileHeader);
+  size_t bk = f + rank * sizeof(BlockHeader);
+  size_t bp = f + size * sizeof(BlockHeader);
 
-  // 3.)
+  // determine local offsets of compressed blocks, that is byte offset ck for
+  // rank k. The number of bytes for the compressed blocks can be different on
+  // each rank.
+  size_t prev_cbytes = 0;
+  MPI_Exscan(&cbytes, &prev_cbytes, 1, MPI_UNSIGNED_LONG, MPI_SUM,
+             MPI_COMM_WORLD);
+  size_t ck = bp + prev_cbytes;
 
-  // 4.)
+  // fill block header
   BlockHeader bheader;
+  bheader.start = ck;
+  bheader.compressed_bytes = cbytes;
+  bheader.bufsize = bufsize;
 
-  // TODO: file write operations
-  // 1.) open MPI file for write operations
-  // 2.) write headers (root will also write the file header)
-  // 3.) write compressed data
-  // 4.) close file
-
-  // 1.)
+  // open MPI file for write operations
   MPI_File fh;
   MPI_Status st;
+  MPI_File_open(MPI_COMM_WORLD, fname.c_str(),
+                MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-  // 2.)
+  // write headers (root will also write the file header)
+  if (isroot) {
+    MPI_File_write_at(fh, 0, &fheader, sizeof(FileHeader), MPI_CHAR, &st);
+  }
+  MPI_File_write_at_all(fh, bk, &bheader, sizeof(BlockHeader), MPI_CHAR, &st);
 
-  // 3.)
+  // write compressed data
+  MPI_File_write_at_all(fh, ck, cbuf, cbytes, MPI_CHAR, &st);
 
-  // 4.)
+  // close file
+  MPI_File_close(&fh);
 }
 
 /**
@@ -124,24 +133,31 @@ unsigned char *read_data(const string &fname, size_t &cbytes, size_t &bufsize,
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  // TODO: file read operations
-  // 1.) open MPI file for read operations
-  // 2.) read headers (meta data)
-  // 3.) allocate data buffer and read compressed data from file
-  // 4.) close file
-
-  // 1.)
+  // open MPI file for read operations
   MPI_File fh;
   MPI_Status st;
+  MPI_File_open(MPI_COMM_WORLD, fname.c_str(), MPI_MODE_RDONLY, MPI_INFO_NULL,
+                &fh);
 
-  // 2.)
+  // read headers (meta data)
   FileHeader fheader;  // to be filled with meta data read from file
   BlockHeader bheader; // to be filled with meta data read from file
+  MPI_File_read_at_all(fh, 0, &fheader, sizeof(FileHeader), MPI_CHAR, &st);
+  MPI_File_read_at_all(fh, sizeof(FileHeader) + rank * sizeof(BlockHeader),
+                       &bheader, sizeof(BlockHeader), MPI_CHAR, &st);
 
-  // 3.)
-  unsigned char *cbuf = nullptr; // allocate memory for reading file contents
+  tol = fheader.tol;
+  Nx = fheader.Nx;
+  Ny = fheader.Ny;
+  cbytes = bheader.compressed_bytes;
+  bufsize = bheader.bufsize;
 
-  // 4.)
+  // allocate data buffer and read compressed data from file
+  auto *cbuf = new unsigned char[cbytes];
+  MPI_File_read_at_all(fh, bheader.start, cbuf, cbytes, MPI_CHAR, &st);
+
+  // close file
+  MPI_File_close(&fh);
 
   return cbuf;
 }
@@ -173,7 +189,7 @@ int main(int argc, char *argv[]) {
   assert(0 == N % size);          // check that domain decomposition is sane
   const size_t myrows = N / size; // decompose domain into tiles
   t1 = Clock::now();
-  double *data = read_gzfile_tile<double>(infile, rank * myrows, N, myrows);
+  auto *data = read_gzfile_tile<double>(infile, rank * myrows, N, myrows);
   t2 = Clock::now();
   report_time(t1, t2, "Read GZIP");
 
