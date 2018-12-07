@@ -11,8 +11,10 @@ with open('compression_rates.txt') as f:
         if line.startswith('Compression rate'):
             compression_rates.append(float(line.split(': ')[1].split('\n')[0]))
 
-plt.semilogx(tolerances, compression_rates, 'o--')
+plt.plot(tolerances, compression_rates, 'o--', label='ZFP')
 plt.xlabel('tolerance')
 plt.ylabel('compression rate')
+plt.axhline(128 / 17, color='r', label='GZIP')
+plt.legend(loc=0)
 plt.title('Compression Rate Analysis')
 plt.savefig('compression_rates.png', bbox_inches='tight')
