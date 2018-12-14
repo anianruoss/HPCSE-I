@@ -61,11 +61,11 @@ public:
   void advance() {
     // ADI Step 1: Update rows at half time step
     // Solve implicit system with Thomas algorithm
-    std::vector<double> v(real_N_, 0.);
-
+#pragma omp parallel for
     for (size_t j = 1; j < real_N_ - 1; ++j) {
-      v[0] = v[real_N_ - 1] = 0.;
+      std::vector<double> v(real_N_, 0.);
 
+      // compute right hand side
       for (size_t i = 1; i < real_N_ - 1; ++i) {
         v[i] =
             D_ * (rho_[i * real_N_ + j + 1] + rho_[i * real_N_ + j - 1]) / R_ +
@@ -88,9 +88,11 @@ public:
 
     // ADI Step 2: Update columns at full time step
     // Solve implicit system with Thomas algorithm
+#pragma omp parallel for
     for (size_t i = 1; i < real_N_ - 1; ++i) {
-      v[0] = v[real_N_ - 1] = 0.;
+      std::vector<double> v(real_N_, 0.);
 
+      // compute right hand side
       for (size_t j = 1; j < real_N_ - 1; ++j) {
         v[j] = D_ *
                    (rho_tmp_[(i + 1) * real_N_ + j] +
@@ -116,6 +118,7 @@ public:
 
   void compute_diagnostics(const double t) {
     double heat = 0.0;
+#pragma omp parallel for reduction(+ : heat) collapse(2)
     for (size_t i = 1; i <= N_; ++i)
       for (size_t j = 1; j <= N_; ++j)
         heat += dr_ * dr_ * rho_[i * real_N_ + j];
@@ -134,10 +137,10 @@ public:
   }
 
 private:
-  /* Initialize rho(x, y, t=0) */
   void initialize_rho() {
+    // Initialize rho(x, y, t=0) based on the prescribed initial conditions
     double bound = 0.25 * L_;
-    // Initialize rho based on the prescribed initial conditions
+#pragma omp parallel for collapse(2)
     for (size_t i = 1; i <= N_; ++i) {
       for (size_t j = 1; j <= N_; ++j) {
         if ((std::abs((i - 1.) * dr_ - L_ / 2.) < bound) &&
