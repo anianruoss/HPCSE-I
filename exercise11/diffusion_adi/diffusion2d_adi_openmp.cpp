@@ -78,15 +78,13 @@ public:
       }
 
       // second step of Thomas algorithm
-      rho_tmp_[(real_N_ - 1) * real_N_ + j] = v[real_N_ - 1] / b_[real_N_ - 1];
+      rho_tmp_[j * real_N_ + real_N_ - 1] = v[real_N_ - 1] / b_[real_N_ - 1];
 
       for (int i = static_cast<int>(real_N_) - 2; i >= 0; --i) {
-        rho_tmp_[i * real_N_ + j] =
-            (v[i] - c_[i] * rho_tmp_[(i + 1) * real_N_ + j]) / b_[i];
+        rho_tmp_[j * real_N_ + i] =
+            (v[i] - c_[i] * rho_tmp_[j * real_N_ + i + 1]) / b_[i];
       }
     }
-
-    std::copy(rho_tmp_.begin(), rho_tmp_.end(), rho_.begin());
 
     // ADI Step 2: Update columns at full time step
     // Solve implicit system with Thomas algorithm
@@ -95,9 +93,10 @@ public:
 
       for (size_t j = 1; j < real_N_ - 1; ++j) {
         v[j] = D_ *
-                   (rho_[(i + 1) * real_N_ + j] + rho_[(i - 1) * real_N_ + j]) /
+                   (rho_tmp_[(i + 1) * real_N_ + j] +
+                    rho_tmp_[(i - 1) * real_N_ + j]) /
                    R_ +
-               (1. - 2. * D_ / R_) * rho_[i * real_N_ + j];
+               (1. - 2. * D_ / R_) * rho_tmp_[i * real_N_ + j];
       }
 
       // first step of Thomas algorithm
@@ -106,15 +105,13 @@ public:
       }
 
       // second step of Thomas algorithm
-      rho_tmp_[i * real_N_ + (real_N_ - 1)] = v[real_N_ - 1] / b_[real_N_ - 1];
+      rho_[i * real_N_ + (real_N_ - 1)] = v[real_N_ - 1] / b_[real_N_ - 1];
 
       for (int j = static_cast<int>(real_N_) - 2; j >= 0; --j) {
-        rho_tmp_[i * real_N_ + j] =
-            (v[j] - c_[j] * rho_tmp_[i * real_N_ + (j + 1)]) / b_[j];
+        rho_[i * real_N_ + j] =
+            (v[j] - c_[j] * rho_[i * real_N_ + (j + 1)]) / b_[j];
       }
     }
-
-    std::copy(rho_tmp_.begin(), rho_tmp_.end(), rho_.begin());
   }
 
   void compute_diagnostics(const double t) {

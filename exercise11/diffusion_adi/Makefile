@@ -26,4 +26,5 @@ diffusion2d_adi_openmp: diffusion2d_adi_openmp.cpp
 
 
 clean:
-	rm -f diffusion2d_adi_openmp
+	rm -f diffusion2d_adi_openmp diagnostics_openmp.dat
+
