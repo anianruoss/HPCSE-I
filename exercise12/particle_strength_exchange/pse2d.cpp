@@ -1,12 +1,14 @@
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 
-constexpr int SQRT_N = 32;          // Number of particles per dimension.
-constexpr int N = SQRT_N * SQRT_N;  // Number of particles.
-constexpr double DOMAIN_SIZE = 1.0; // Domain side length.
-constexpr double eps = 0.05;        // Epsilon.
-constexpr double nu = 1.0;          // Diffusion constant.
-constexpr double dt = 0.00001;      // Time step.
+constexpr int SQRT_N = 32;            // Number of particles per dimension.
+constexpr int N = SQRT_N * SQRT_N;    // Number of particles.
+constexpr double DOMAIN_SIZE = 1.0;   // Domain side length.
+constexpr double eps = 0.05;          // Epsilon.
+constexpr double eps_sqr = eps * eps; // Epsilon.
+constexpr double nu = 1.0;            // Diffusion constant.
+constexpr double dt = 0.00001;        // Time step.
 
 // Particle storage.
 double x[N];
@@ -38,19 +40,56 @@ void init() {
 }
 
 /*
- * Perform a single timestep. Compute RHS of Eq. (2) and update values of phi_i.
+ * Perform a single timestep.
  */
 void timestep() {
   const double volume = sqr(DOMAIN_SIZE) / N;
 
-  // Placeholder, remove this.
-  for (int i = 0; i < N; ++i)
-    phi[i] *= 0.995;
+  auto T = new double[N * N];
+  auto eta_eps = [](double xi, double yi, double xj, double yj) {
+    return 4. *
+           exp(-((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj)) / eps_sqr) /
+           (M_PI * eps_sqr);
+  };
 
-  // TODO 1b: Implement the RHS of Eq. (2), and the Eq. (3).
+  auto nearest_neighbor = [](double xi, double yi, double xj, double yj) {
+    double min = (xi - xj) * (xi - xj) + (yi - yj) * (yi - yj);
+    double min_xj = xj;
+    double min_yj = yj;
 
-  // TODO 1c: Implement the forward Euler update of phi_i, as defined in Eq.
-  // (2).
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        double tmp = (xi - (xj + j - 1)) * (xi - (xj + j - 1)) +
+                     (yi - (yj + j - 1)) * (yi - (yj + j - 1));
+
+        if (tmp < min) {
+          min = tmp;
+          min_xj = (xj + j - 1);
+          min_yj = (yj + j - 1);
+        }
+      }
+    }
+
+    return std::make_pair(min_xj, min_yj);
+  };
+
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < N; ++j) {
+      auto periodic_neighbor = nearest_neighbor(x[j], y[j], x[i], y[i]);
+      T[i * N + j] = nu * volume * (phi[j] - phi[i]) *
+                     eta_eps(x[j], y[j], periodic_neighbor.first,
+                             periodic_neighbor.second) /
+                     eps_sqr;
+    }
+  }
+
+  for (int i = 0; i < N; ++i) {
+    double sum = 0;
+    for (int j = 0; j < N; ++j) {
+      sum += T[i * N + j];
+    }
+    phi[i] += dt * sum;
+  }
 }
 
 /*
