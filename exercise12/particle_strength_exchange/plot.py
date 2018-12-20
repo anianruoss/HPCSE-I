@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-import numpy as np
+import glob
+import os
+
 import matplotlib
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+import numpy as np
 
-import glob
-import os
 
 datafiles = sorted(glob.glob('output/plot2d_*.txt'))
 print("Plotting {} frame(s).".format(len(datafiles)))
@@ -32,7 +33,9 @@ for filename in datafiles:
 
 print("Running ffmpeg to generate a video...")
 try:
-    os.system('ffmpeg -v panic -stats -framerate 20 -pix_fmt rgba -s 640x480 -i "output/plot2d_%03d.txt.raw" -c:v libx264 -r 20 -pix_fmt yuv420p -y "movie2d.mp4"')
+    os.system(
+        'ffmpeg -v panic -stats -framerate 20 -pix_fmt rgba -s 640x480 -i "output/plot2d_%03d.txt.raw" -c:v libx264 -r 20 -pix_fmt yuv420p -y "movie2d.mp4"'
+    )
 except:
     print("================================================")
     print("Are you on Euler, did you forget to module load?")
