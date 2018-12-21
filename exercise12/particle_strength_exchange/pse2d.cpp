@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -46,40 +47,18 @@ void timestep() {
   const double volume = sqr(DOMAIN_SIZE) / N;
 
   auto T = new double[N * N];
-  auto eta_eps = [](double xi, double yi, double xj, double yj) {
-    return 4. *
-           exp(-((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj)) / eps_sqr) /
-           (M_PI * eps_sqr);
-  };
-
-  auto nearest_neighbor = [](double xi, double yi, double xj, double yj) {
-    double min = (xi - xj) * (xi - xj) + (yi - yj) * (yi - yj);
-    double min_xj = xj;
-    double min_yj = yj;
-
-    for (int i = 0; i < 3; ++i) {
-      for (int j = 0; j < 3; ++j) {
-        double tmp = (xi - (xj + j - 1)) * (xi - (xj + j - 1)) +
-                     (yi - (yj + j - 1)) * (yi - (yj + j - 1));
-
-        if (tmp < min) {
-          min = tmp;
-          min_xj = (xj + j - 1);
-          min_yj = (yj + j - 1);
-        }
-      }
-    }
-
-    return std::make_pair(min_xj, min_yj);
+  auto eta_eps = [](double dx, double dy) {
+    return 4. * exp(-(dx * dx + dy * dy) / eps_sqr) / (M_PI * eps_sqr);
   };
 
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
-      auto periodic_neighbor = nearest_neighbor(x[j], y[j], x[i], y[i]);
-      T[i * N + j] = nu * volume * (phi[j] - phi[i]) *
-                     eta_eps(x[j], y[j], periodic_neighbor.first,
-                             periodic_neighbor.second) /
-                     eps_sqr;
+        // compute kernel with closest periodic neighbor
+      T[i * N + j] =
+          nu * volume * (phi[j] - phi[i]) *
+          eta_eps(std::min(std::abs(x[i] - x[j]), 1. - std::abs(x[i] - x[j])),
+                  std::min(std::abs(y[i] - y[j]), 1. - std::abs(y[i] - y[j]))) /
+          eps_sqr;
     }
   }
 
