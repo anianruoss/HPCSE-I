@@ -53,7 +53,7 @@ void timestep() {
 
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
-        // compute kernel with closest periodic neighbor
+      // compute kernel with closest periodic neighbor
       T[i * N + j] =
           nu * volume * (phi[j] - phi[i]) *
           eta_eps(std::min(std::abs(x[i] - x[j]), 1. - std::abs(x[i] - x[j])),
